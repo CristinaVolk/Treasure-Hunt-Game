@@ -9,15 +9,14 @@ const HEIGHT = 500;
 class Cell extends React.Component {
   render() {
     const { x, y, color } = this.props;
-    //console.log(x, y, color);
     return (
       <div
         className="Cell"
         style={{
-          left: `${CELL_SIZE * x + 1}px`,
-          top: `${CELL_SIZE * y + 1}px`,
-          width: `${CELL_SIZE - 1}px`,
-          height: `${CELL_SIZE - 1}px`,
+          left: `${CELL_SIZE * x}px`,
+          top: `${CELL_SIZE * y}px`,
+          width: `${CELL_SIZE}px`,
+          height: `${CELL_SIZE}px`,
           background: `${color}`
         }}
       />
@@ -56,25 +55,39 @@ class Game extends React.Component {
     return board;
   }
 
+  check_exists(y, x, arr) {
+    if (arr.some(item => item.x === x && item.y === y)) {
+      console.log("Found");
+      return true;
+    } else {
+      console.log("Not found");
+      return false;
+    }
+  }
+
   getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
 
   generateTresures() {
     let arr_tresures = [];
-    for (let i = 0; i < 3; i++) {
+    let i = 0;
+    while (i < 3) {
       let x = this.getRandomInt(5);
       let y = this.getRandomInt(5);
-      if (arr_tresures.includes({ x, y })) continue;
-      this.board[x][y] = true;
-      arr_tresures.push({ x: x, y: y });
+      if (this.check_exists(y, x, arr_tresures)) continue;
+      this.board[y][x] = true;
+      arr_tresures.push({ y, x });
+      i++;
     }
     console.log(arr_tresures);
+    return arr_tresures;
   }
 
   getElementOffset() {
     const rect = this.boardRef.getBoundingClientRect();
     const doc = document.documentElement;
+    console.log(rect.left, rect.y);
 
     return {
       x: rect.left + window.pageXOffset - doc.clientLeft,
@@ -85,9 +98,9 @@ class Game extends React.Component {
   makeCells = () => {
     let cells = [];
     let color = `blue`;
-    for (let x = 0; x < this.rows; x++) {
-      for (let y = 0; y < this.cols; y++) {
-        if (this.board[x][y]) color = `coral`;
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        if (this.board[y][x]) color = `coral`;
         else color = `white`;
         cells.push({ x, y, color });
       }
@@ -95,52 +108,64 @@ class Game extends React.Component {
     return cells;
   };
 
-  check_neighbours(x, y) {
+  check_neighbours(y, x) {
+    let val_cell = "1";
+    console.log(y, x);
     let diagonal_neighbors = [
-      { x_n: -1, y_n: -1 },
-      { x_n: -1, y_n: 1 },
-      { x_n: 1, y_n: 1 },
-      { x_n: 1, y_n: -1 }
+      { y_n: -1, x_n: -1 },
+      { y_n: -1, x_n: 1 },
+      { y_n: 1, x_n: 1 },
+      { y_n: 1, x_n: -1 }
     ];
 
     let side_neighbors = [
-      { x_n: -1, y_n: 0 },
-      { x_n: 0, y_n: 1 },
-      { x_n: 1, y_n: 0 },
-      { x_n: 0, y_n: -1 }
+      { y_n: -1, x_n: 0 },
+      { y_n: 0, x_n: 1 },
+      { y_n: 1, x_n: 0 },
+      { y_n: 0, x_n: -1 }
     ];
 
-    if (this.state.tresures.includes({ x, y })) {
+    if (this.check_exists(y, x, this.tresures)) {
       return "T";
-    }
+    } else {
+      for (let i = 0; i < diagonal_neighbors.length; i++) {
+        let x1 = x + diagonal_neighbors[i].x_n;
+        let y1 = y + diagonal_neighbors[i].y_n;
+        console.log(y1, x1);
+        if (this.check_exists(y1, x1, this.tresures)) {
+          val_cell = "2";
+          console.log(val_cell);
+          break;
+        }
+      }
 
-    for (let i = 0; i < diagonal_neighbors.length; i++) {
-      let x1 = x + diagonal_neighbors[i].x_n;
-      let y1 = y + diagonal_neighbors[i].y_n;
-      if (this.state.tresures.includes({ x: x1, y: y1 })) return "2";
+      for (let i = 0; i < side_neighbors.length; i++) {
+        let x1 = x + side_neighbors[i].x_n;
+        let y1 = y + side_neighbors[i].y_n;
+        if (this.check_exists(y1, x1, this.tresures)) {
+          val_cell = "3";
+          console.log(val_cell);
+          break;
+        }
+      }
     }
-
-    for (let i = 0; i < side_neighbors.length; i++) {
-      let x1 = x + side_neighbors[i].x_n;
-      let y1 = y + side_neighbors[i].y_n;
-      if (this.state.tresures.includes({ x: x1, y: y1 })) return "3";
-    }
-
-    return "1";
+    return val_cell;
   }
 
   handleClick = event => {
     const elemOffset = this.getElementOffset();
+    console.log(event.clientX, event.clientY);
+
     const offsetX = event.clientX - elemOffset.x;
     const offsetY = event.clientY - elemOffset.y;
-    this.score++;
 
     const x = Math.floor(offsetX / CELL_SIZE);
     const y = Math.floor(offsetY / CELL_SIZE);
 
     if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
       //invoke functions for checking and assigning values(1,2,3,T)/scores
-      this.check_neighbours(x, y);
+      const cell_val = this.check_neighbours(y, x);
+      console.log(cell_val);
     }
 
     this.setState({ cells: this.makeCells() });
@@ -236,7 +261,6 @@ class Game extends React.Component {
               }}
             >
               {cells.map(cell => {
-                console.log(cell.color);
                 return (
                   <Cell
                     x={cell.x}
