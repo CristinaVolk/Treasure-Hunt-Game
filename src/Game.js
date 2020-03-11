@@ -1,5 +1,6 @@
 import React from "react";
 import "./Game.css";
+import Login from "./Login";
 
 const CELL_SIZE = 100;
 const WIDTH = 500;
@@ -30,18 +31,18 @@ class Game extends React.Component {
     this.rows = HEIGHT / CELL_SIZE;
     this.cols = WIDTH / CELL_SIZE;
     this.board = this.makeEmptyBoard();
+    this.tresures = this.generateTresures();
+    this.user = null;
     this.score = 0;
-    //this.cells = [];
-    this.makeCells = this.makeCells.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   state = {
     cells: [],
     isRunning: false,
-    //score: 0,
-    tresures: []
+    isUser: false
   };
 
   makeEmptyBoard() {
@@ -64,11 +65,11 @@ class Game extends React.Component {
     for (let i = 0; i < 3; i++) {
       let x = this.getRandomInt(5);
       let y = this.getRandomInt(5);
+      if (arr_tresures.includes({ x, y })) continue;
       this.board[x][y] = true;
       arr_tresures.push({ x: x, y: y });
     }
     console.log(arr_tresures);
-    this.setState({ tresures: arr_tresures });
   }
 
   getElementOffset() {
@@ -143,19 +144,15 @@ class Game extends React.Component {
     }
 
     this.setState({ cells: this.makeCells() });
-    //this.setState({ score: toString(score) });
   };
 
   runGame = () => {
     this.setState({ isRunning: true });
-    this.generateTresures();
     this.setState({ cells: this.makeCells() });
-    //this.cells = this.makeCells();
   };
 
   stopGame = () => {
     this.setState({ isRunning: false });
-    console.log("GAME OVER");
   };
 
   runIteration() {
@@ -213,65 +210,63 @@ class Game extends React.Component {
     this.setState({ cells: this.makeCells() });
   };
 
-  handleRandom = () => {
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
-        this.board[y][x] = Math.random() >= 0.5;
-      }
-    }
-
-    this.setState({ cells: this.makeCells() });
+  newUser = flag => {
+    this.setState({ isUser: true });
+    this.user = this.board;
   };
 
   render() {
-    const { cells, isRunning } = this.state;
+    const { cells, isRunning, isUser } = this.state;
     return (
       <div>
-        <div
-          className="Board"
-          style={{
-            width: WIDTH,
-            height: HEIGHT,
-            backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`
-          }}
-          onClick={this.handleClick}
-          ref={n => {
-            this.boardRef = n;
-          }}
-        >
-          {cells.map(cell => {
-            console.log(cell.color);
-            return (
-              <Cell
-                x={cell.x}
-                y={cell.y}
-                color={cell.color}
-                key={`${cell.x},${cell.y}`}
-              />
-            );
-          })}
-        </div>
+        {!isUser ? (
+          <Login onUser={this.newUser} />
+        ) : (
+          <div>
+            <div
+              className="Board"
+              style={{
+                width: WIDTH,
+                height: HEIGHT,
+                backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`
+              }}
+              onClick={this.handleClick}
+              ref={n => {
+                this.boardRef = n;
+              }}
+            >
+              {cells.map(cell => {
+                console.log(cell.color);
+                return (
+                  <Cell
+                    x={cell.x}
+                    y={cell.y}
+                    color={cell.color}
+                    key={`${cell.x},${cell.y}`}
+                  />
+                );
+              })}
+            </div>
 
-        <div className="controls">
-          <p>Your Score</p>
-          <h3>{this.score}</h3>
-          <p>points</p>
-          {isRunning ? (
-            <button className="button" onClick={this.stopGame}>
-              Stop
-            </button>
-          ) : (
-            <button className="button" onClick={this.runGame}>
-              Run
-            </button>
-          )}
-          <button className="button" onClick={this.handleRandom}>
-            Random
-          </button>
-          <button className="button" onClick={this.handleClear}>
-            Clear
-          </button>
-        </div>
+            <div className="controls">
+              <p>Your Score</p>
+              <h3>{this.score}</h3>
+              <p>points</p>
+              {isRunning ? (
+                <button className="button" onClick={this.stopGame}>
+                  Stop
+                </button>
+              ) : (
+                <button className="button" onClick={this.runGame}>
+                  Run
+                </button>
+              )}
+              <button className="button" onClick={this.handleClear}>
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
