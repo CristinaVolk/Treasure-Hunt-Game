@@ -8,7 +8,7 @@ const HEIGHT = 500;
 
 class Cell extends React.Component {
   render() {
-    const { x, y, color, value, isRunning } = this.props;
+    const { x, y, color, value, isEnabled } = this.props;
     return (
       <div
         className="Cell"
@@ -18,7 +18,7 @@ class Cell extends React.Component {
           width: `${CELL_SIZE}px`,
           height: `${CELL_SIZE}px`,
           background: `${color}`,
-          pointerEvents: isRunning ? `auto` : `none`
+          pointerEvents: isEnabled ? `auto` : `none`
         }}
       >
         <h1>{value}</h1>
@@ -33,19 +33,20 @@ class Game extends React.Component {
     this.rows = HEIGHT / CELL_SIZE;
     this.cols = WIDTH / CELL_SIZE;
     this.board = this.makeEmptyBoard();
-    this.tresures = this.generateTresures();
+    this.tresures = [];
     this.user = null;
-    this.score = 0;
     this.count = 0;
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
-    this.handleClear = this.handleClear.bind(this);
+    //this.handleClear = this.handleClear.bind(this);
   }
 
   state = {
     cells: [],
     isRunning: false,
-    isUser: false
+    isUser: false,
+    isEnabled: false,
+    isGameStart: false
   };
 
   makeEmptyBoard() {
@@ -93,10 +94,10 @@ class Game extends React.Component {
 
   makeCells = () => {
     let cells = [];
-    let color = `white`;
+    let color = `#554562`;
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        cells.push({ x, y, color });
+        cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
       }
     }
     return cells;
@@ -153,37 +154,44 @@ class Game extends React.Component {
     let user_answers = this.user.selected_answers;
     let cells_values = this.state.cells;
     console.log(user_cells_values);
+    if (user_cells_values.filter(item => item.includes(`T`))) {
+      this.user.score++;
+    }
 
+    let i = 0;
     user_answers.forEach(item => {
-      let i = 0;
       const objIndex = cells_values.findIndex(
         obj => obj.y === item.y && obj.x === item.x
       );
+      console.log(objIndex, user_cells_values[i]);
 
       if (user_cells_values[i].includes(`T`)) {
         cells_values[objIndex].color = `#ee6c75`;
         cells_values[objIndex].value = `T`;
-      }
-      if (user_cells_values[i].includes(`3`)) {
+        cells_values[objIndex].isEnabled = false;
+      } else if (user_cells_values[i].includes(`3`)) {
         cells_values[objIndex].color = `#ddc1cc`;
         cells_values[objIndex].value = `3`;
-      }
-      if (user_cells_values[i].includes(`2`)) {
+        cells_values[objIndex].isEnabled = false;
+      } else if (user_cells_values[i].includes(`2`)) {
         cells_values[objIndex].color = `#e4f1e7`;
         cells_values[objIndex].value = `2`;
-      }
-      if (user_cells_values[i].includes(`1`)) {
+        cells_values[objIndex].isEnabled = false;
+      } else if (user_cells_values[i].includes(`1`)) {
         cells_values[objIndex].color = `#e1eafb`;
         cells_values[objIndex].value = `1`;
+        cells_values[objIndex].isEnabled = false;
       }
       i++;
-      console.log(cells_values[objIndex].value);
     });
 
     return cells_values;
   };
 
   handleClick = event => {
+    this.count++;
+    let trials;
+    console.log(this.count);
     const elemOffset = this.getElementOffset();
 
     const offsetX = event.clientX - elemOffset.x;
@@ -191,74 +199,74 @@ class Game extends React.Component {
 
     const x = Math.floor(offsetX / CELL_SIZE);
     const y = Math.floor(offsetY / CELL_SIZE);
+
+    const objIndex = this.state.cells.findIndex(
+      obj => obj.y === y && obj.x === x
+    );
+
+    if (this.state.cells[objIndex].isEnabled === false) {
+      this.count--;
+      return;
+    }
     if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
       this.user.selected_answers.push({ y, x });
     }
 
-    if (this.count === 2) {
+    if (this.count === 3) {
+      trials++;
       let user_cell_values = this.check_neighbours();
 
       this.setState({
         cells: this.changeCells(user_cell_values)
       });
+      console.log("User score ", this.user.score);
+
+      if (this.user.score === 3) {
+        this.setState({ isRunning: false });
+        this.user.results.push(trials);
+      }
 
       this.count = 0;
       this.user.selected_answers = [];
-    } else this.count++;
+    }
   };
 
-  /*runIteration() {
-      for (let y = 0; y < this.rows; y++) {
-        for (let x = 0; x < this.cols; x++) {
-          let neighbors = this.calculateNeighbors(this.board, x, y);
-          if (this.board[y][x]) {
-            if (neighbors === 2 || neighbors === 3) {
-              newBoard[y][x] = true;
-            } else {
-              newBoard[y][x] = false;
-            }
-          } else {
-            if (!this.board[y][x] && neighbors === 3) {
-              newBoard[y][x] = true;
-            }
-          }
-        }
-      }
-    }*/
-
   runGame = () => {
-    this.setState({ isRunning: true });
-    this.setState({ cells: this.makeCells() });
     this.user = {
       board: this.board,
-      selected_answers: []
+      selected_answers: [],
+      score: 0,
+      results: []
     };
-    //this.runIteration();
+
+    this.setState({ isGameStart: true });
+  };
+
+  runCall = () => {
+    this.tresures = this.generateTresures();
+    this.setState({ isRunning: true });
+    this.setState({ cells: this.makeCells() });
+
+    this.count = 0;
+    this.user.score = 0;
   };
 
   stopGame = () => {
     this.setState({ isRunning: false });
   };
 
-  /**
-   * Calculate the number of neighbors at point (x, y)
-   * @param {Array} board
-   * @param {int} x
-   * @param {int} y
-   */
-
-  handleClear = () => {
+  clear_board = () => {
     this.board = this.makeEmptyBoard();
     this.setState({ cells: this.makeCells() });
   };
 
-  newUser = flag => {
+  newUser = () => {
     this.setState({ isUser: true });
     this.user = this.board;
   };
 
   render() {
-    const { cells, isRunning, isUser } = this.state;
+    const { cells, isRunning, isUser, isGameStart } = this.state;
     return (
       <div>
         {!isUser ? (
@@ -271,7 +279,7 @@ class Game extends React.Component {
                 width: WIDTH,
                 height: HEIGHT,
                 backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
-                pointerEvents: isRunning ? `` : `none`
+                pointerEvents: `none`
               }}
               onClick={this.handleClick}
               ref={n => {
@@ -285,7 +293,7 @@ class Game extends React.Component {
                     y={cell.y}
                     color={cell.color}
                     value={cell.value}
-                    isRunning={this.state.isRunning}
+                    isEnabled={cell.isEnabled}
                     key={`${cell.x},${cell.y}`}
                   />
                 );
@@ -293,16 +301,14 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {isRunning ? (
-                "Find 3 items of treasures in 10 trials!"
+              {isGameStart || isRunning ? (
+                <button className="button" onClick={this.runCall}>
+                  Run Set
+                </button>
               ) : (
                 <div>
-                  <p>Your Score</p>
-                  <h3>{this.score}</h3>
-                  <p>points</p>
-
                   <button className="button" onClick={this.runGame}>
-                    Run
+                    Run Game
                   </button>
                 </div>
               )}
