@@ -1,46 +1,44 @@
 import React, { Component } from "react";
-import TextField from "@material-ui/core/TextField";
 
 class Login extends Component {
   constructor(props) {
     super(props);
     this.addNewUser = this.addNewUser.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
   state = {
     username: "",
     isUser: false
   };
 
-  addNewUser = () => {
-    this.props.onUser(this.state.isUser);
-    this.setState({ isUser: true });
-  };
+  handleChange(event) {
+    this.setState({ username: event.target.value });
+  }
+
+  addNewUser(event) {
+    event.preventDefault();
+    if (this.state.username.length > 0) {
+      this.props.onUser(this.state.isUser);
+      this.setState({ isUser: true });
+    } else {
+      alert("You should provide your name");
+    }
+  }
 
   render() {
     return (
-      <div>
-        <div>
-          <TextField
-            placeholder="Enter your Username"
-            label="Username"
-            onChange={(event, newValue) =>
-              this.setState({ username: newValue })
-            }
+      <form onSubmit={this.addNewUser}>
+        <label>
+          Name:
+          <input
+            type="text"
+            value={this.state.value}
+            onChange={this.handleChange}
           />
-          <br />
-
-          <br />
-          <button
-            label="Submit"
-            color="primary"
-            onClick={this.addNewUser}
-          ></button>
-        </div>
-      </div>
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
     );
   }
 }
-const style = {
-  margin: 15
-};
 export default Login;

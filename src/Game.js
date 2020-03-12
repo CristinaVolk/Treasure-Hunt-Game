@@ -19,7 +19,7 @@ class Cell extends React.Component {
           height: `${CELL_SIZE}px`,
           background: `${color}`
         }}
-      />
+      ></div>
     );
   }
 }
@@ -97,11 +97,9 @@ class Game extends React.Component {
 
   makeCells = () => {
     let cells = [];
-    let color = `blue`;
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        if (this.board[y][x]) color = `coral`;
-        else color = `white`;
+        let color = `white`;
         cells.push({ x, y, color });
       }
     }
@@ -152,7 +150,18 @@ class Game extends React.Component {
     return val_cell;
   }
 
+  changeCells = (cells_arr, y, x, cell_val) => {
+    const objIndex = cells_arr.findIndex(obj => obj.y === y && obj.x === x);
+    console.log(cells_arr[objIndex]);
+    if (cell_val.includes("T")) cells_arr[objIndex].color = `coral`;
+    if (cell_val.includes("3")) cells_arr[objIndex].color = `aqua`;
+    if (cell_val.includes("2")) cells_arr[objIndex].color = `green`;
+    if (cell_val.includes("1")) cells_arr[objIndex].color = `blue`;
+    return cells_arr;
+  };
+
   handleClick = event => {
+    let cell_val;
     const elemOffset = this.getElementOffset();
     console.log(event.clientX, event.clientY);
 
@@ -163,12 +172,13 @@ class Game extends React.Component {
     const y = Math.floor(offsetY / CELL_SIZE);
 
     if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
-      //invoke functions for checking and assigning values(1,2,3,T)/scores
-      const cell_val = this.check_neighbours(y, x);
+      cell_val = this.check_neighbours(y, x);
       console.log(cell_val);
     }
 
-    this.setState({ cells: this.makeCells() });
+    this.setState({
+      cells: this.changeCells(this.state.cells, y, x, cell_val)
+    });
   };
 
   runGame = () => {
@@ -180,18 +190,7 @@ class Game extends React.Component {
     this.setState({ isRunning: false });
   };
 
-  runIteration() {
-    let newBoard = this.board;
-
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
-        let neighbors = this.calculateNeighbors(this.board, x, y);
-      }
-    }
-
-    this.board = newBoard;
-    this.setState({ cells: this.makeCells() });
-  }
+  runIteration() {}
 
   /**
    * Calculate the number of neighbors at point (x, y)
