@@ -36,6 +36,7 @@ class Game extends React.Component {
     this.tresures = this.generateTresures();
     this.user = null;
     this.score = 0;
+    this.count = 0;
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
     this.handleClear = this.handleClear.bind(this);
@@ -101,9 +102,11 @@ class Game extends React.Component {
     return cells;
   };
 
-  check_neighbours(y, x) {
+  check_neighbours() {
+    let answers_arr = this.user.selected_answers;
     let val_cell = "1";
-    console.log(y, x);
+    let val_cell_arr = [];
+
     let diagonal_neighbors = [
       { y_n: -1, x_n: -1 },
       { y_n: -1, x_n: 1 },
@@ -118,87 +121,124 @@ class Game extends React.Component {
       { y_n: 0, x_n: -1 }
     ];
 
-    if (this.check_exists(y, x, this.tresures)) {
-      return "T";
-    } else {
-      for (let i = 0; i < diagonal_neighbors.length; i++) {
-        let x1 = x + diagonal_neighbors[i].x_n;
-        let y1 = y + diagonal_neighbors[i].y_n;
-        console.log(y1, x1);
-        if (this.check_exists(y1, x1, this.tresures)) {
-          val_cell = "2";
-          break;
-        }
-      }
+    answers_arr.forEach(element => {
+      if (this.check_exists(element.y, element.x, this.tresures)) {
+        val_cell = "T";
+      } else {
+        for (let i = 0; i < diagonal_neighbors.length; i++) {
+          let x1 = element.x + diagonal_neighbors[i].x_n;
+          let y1 = element.y + diagonal_neighbors[i].y_n;
 
-      for (let i = 0; i < side_neighbors.length; i++) {
-        let x1 = x + side_neighbors[i].x_n;
-        let y1 = y + side_neighbors[i].y_n;
-        if (this.check_exists(y1, x1, this.tresures)) {
-          val_cell = "3";
-          break;
+          if (this.check_exists(y1, x1, this.tresures)) {
+            val_cell = "2";
+            break;
+          }
+        }
+        for (let i = 0; i < side_neighbors.length; i++) {
+          let x1 = element.x + side_neighbors[i].x_n;
+          let y1 = element.y + side_neighbors[i].y_n;
+          if (this.check_exists(y1, x1, this.tresures)) {
+            val_cell = "3";
+            break;
+          }
         }
       }
-    }
-    return val_cell;
+      val_cell_arr.push(val_cell);
+    });
+    console.log(val_cell_arr);
+    return val_cell_arr;
   }
 
-  changeCells = (cells_arr, y, x, cell_val) => {
-    const objIndex = cells_arr.findIndex(obj => obj.y === y && obj.x === x);
+  changeCells = user_cells_values => {
+    let user_answers = this.user.selected_answers;
+    let cells_values = this.state.cells;
+    console.log(user_cells_values);
 
-    if (cell_val.includes(`T`)) {
-      cells_arr[objIndex].color = `#ee6c75`;
-      cells_arr[objIndex].value = `T`;
-    }
-    if (cell_val.includes(`3`)) {
-      cells_arr[objIndex].color = `#ddc1cc`;
-      cells_arr[objIndex].value = `3`;
-    }
-    if (cell_val.includes(`2`)) {
-      cells_arr[objIndex].color = `#e4f1e7`;
-      cells_arr[objIndex].value = `2`;
-    }
-    if (cell_val.includes(`1`)) {
-      cells_arr[objIndex].color = `#e1eafb`;
-      cells_arr[objIndex].value = `1`;
-    }
+    user_answers.forEach(item => {
+      let i = 0;
+      const objIndex = cells_values.findIndex(
+        obj => obj.y === item.y && obj.x === item.x
+      );
 
-    return cells_arr;
+      if (user_cells_values[i].includes(`T`)) {
+        cells_values[objIndex].color = `#ee6c75`;
+        cells_values[objIndex].value = `T`;
+      }
+      if (user_cells_values[i].includes(`3`)) {
+        cells_values[objIndex].color = `#ddc1cc`;
+        cells_values[objIndex].value = `3`;
+      }
+      if (user_cells_values[i].includes(`2`)) {
+        cells_values[objIndex].color = `#e4f1e7`;
+        cells_values[objIndex].value = `2`;
+      }
+      if (user_cells_values[i].includes(`1`)) {
+        cells_values[objIndex].color = `#e1eafb`;
+        cells_values[objIndex].value = `1`;
+      }
+      i++;
+      console.log(cells_values[objIndex].value);
+    });
+
+    return cells_values;
   };
 
   handleClick = event => {
-    if (this.score < 10) {
-      let cell_val;
-      const elemOffset = this.getElementOffset();
+    const elemOffset = this.getElementOffset();
 
-      const offsetX = event.clientX - elemOffset.x;
-      const offsetY = event.clientY - elemOffset.y;
+    const offsetX = event.clientX - elemOffset.x;
+    const offsetY = event.clientY - elemOffset.y;
 
-      const x = Math.floor(offsetX / CELL_SIZE);
-      const y = Math.floor(offsetY / CELL_SIZE);
+    const x = Math.floor(offsetX / CELL_SIZE);
+    const y = Math.floor(offsetY / CELL_SIZE);
+    if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
+      this.user.selected_answers.push({ y, x });
+    }
 
-      if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
-        cell_val = this.check_neighbours(y, x);
-        console.log(cell_val);
-      }
+    if (this.count === 2) {
+      let user_cell_values = this.check_neighbours();
 
       this.setState({
-        cells: this.changeCells(this.state.cells, y, x, cell_val)
+        cells: this.changeCells(user_cell_values)
       });
-      this.score++;
-    } else this.setState({ isRunning: false });
+
+      this.count = 0;
+      this.user.selected_answers = [];
+    } else this.count++;
   };
+
+  /*runIteration() {
+      for (let y = 0; y < this.rows; y++) {
+        for (let x = 0; x < this.cols; x++) {
+          let neighbors = this.calculateNeighbors(this.board, x, y);
+          if (this.board[y][x]) {
+            if (neighbors === 2 || neighbors === 3) {
+              newBoard[y][x] = true;
+            } else {
+              newBoard[y][x] = false;
+            }
+          } else {
+            if (!this.board[y][x] && neighbors === 3) {
+              newBoard[y][x] = true;
+            }
+          }
+        }
+      }
+    }*/
 
   runGame = () => {
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells() });
+    this.user = {
+      board: this.board,
+      selected_answers: []
+    };
+    //this.runIteration();
   };
 
   stopGame = () => {
     this.setState({ isRunning: false });
   };
-
-  runIteration() {}
 
   /**
    * Calculate the number of neighbors at point (x, y)
