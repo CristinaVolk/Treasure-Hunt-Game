@@ -38,7 +38,6 @@ class Game extends React.Component {
     this.count = 0;
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
-    //this.handleClear = this.handleClear.bind(this);
   }
 
   state = {
@@ -125,6 +124,7 @@ class Game extends React.Component {
     answers_arr.forEach(element => {
       if (this.check_exists(element.y, element.x, this.tresures)) {
         val_cell = "T";
+        this.user.score++;
       } else {
         for (let i = 0; i < diagonal_neighbors.length; i++) {
           let x1 = element.x + diagonal_neighbors[i].x_n;
@@ -147,6 +147,7 @@ class Game extends React.Component {
       val_cell_arr.push(val_cell);
     });
     console.log(val_cell_arr);
+
     return val_cell_arr;
   }
 
@@ -154,9 +155,6 @@ class Game extends React.Component {
     let user_answers = this.user.selected_answers;
     let cells_values = this.state.cells;
     console.log(user_cells_values);
-    if (user_cells_values.filter(item => item.includes(`T`))) {
-      this.user.score++;
-    }
 
     let i = 0;
     user_answers.forEach(item => {
@@ -301,16 +299,20 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {isGameStart || isRunning ? (
+              {this.trials === 10 ? <div>{this.user.results.length}</div> : ""}
+              {!isGameStart && !isRunning ? (
+                <button className="button" onClick={this.runGame}>
+                  Run Game
+                </button>
+              ) : (
+                ""
+              )}
+              {!isRunning && isGameStart ? (
                 <button className="button" onClick={this.runCall}>
                   Run Set
                 </button>
               ) : (
-                <div>
-                  <button className="button" onClick={this.runGame}>
-                    Run Game
-                  </button>
-                </div>
+                ""
               )}
             </div>
           </div>
