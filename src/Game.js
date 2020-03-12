@@ -38,7 +38,6 @@ class Game extends React.Component {
     this.count = 0;
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
-    //this.handleClear = this.handleClear.bind(this);
   }
 
   state = {
@@ -300,12 +299,13 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
+              {this.trials === 10 ? <div>{this.user.results.length}</div> : ""}
               {!isGameStart && !isRunning ? (
                 <button className="button" onClick={this.runGame}>
                   Run Game
                 </button>
               ) : (
-                <div></div>
+                ""
               )}
               {!isRunning && isGameStart ? (
                 <button className="button" onClick={this.runCall}>
