@@ -3,6 +3,8 @@ import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 
+const db = require("../database");
+
 class Game extends React.Component {
   constructor() {
     super();
@@ -21,7 +23,8 @@ class Game extends React.Component {
     isRunning: false,
     isUser: false,
     isEnabled: false,
-    isGameStart: false
+    isGameStart: false,
+    topResults: null
   };
 
   makeEmptyBoard() {
@@ -75,6 +78,7 @@ class Game extends React.Component {
         cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
       }
     }
+    db.treasureMap = cells;
     return cells;
   };
 
@@ -189,9 +193,10 @@ class Game extends React.Component {
     if (this.count === 3) {
       trials++;
       let user_cell_values = this.check_neighbours();
+      db.tresureMap = this.changeCells(user_cell_values);
 
       this.setState({
-        cells: this.changeCells(user_cell_values)
+        cells: db.tresureMap
       });
       console.log("User score ", this.user.score);
 
@@ -239,6 +244,12 @@ class Game extends React.Component {
     this.user = this.board;
   };
 
+  displayResult = () => {
+    const results = fetch(`/top/score`)
+      .then(response => response.json())
+      .then(topResults => this.setState(topResults));
+  };
+
   render() {
     const { cells, isRunning, isUser, isGameStart } = this.state;
     return (
@@ -275,7 +286,15 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {this.trials === 10 ? <div>{this.user.results.length}</div> : ""}
+              {this.topResults.length ? (
+                <div>
+                  {this.displayResult.map((result, index) => (
+                    <li key={index}>{result.score}</li>
+                  ))}
+                </div>
+              ) : (
+                ""
+              )}
               {!isGameStart && !isRunning ? (
                 <button className="button" onClick={this.runGame}>
                   Run Game
