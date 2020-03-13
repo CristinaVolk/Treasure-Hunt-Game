@@ -7,21 +7,24 @@ class Login extends Component {
     this.handleChange = this.handleChange.bind(this);
   }
   state = {
-    username: "",
+    name: "",
     isUser: false
   };
 
   handleChange(event) {
-    this.setState({ username: event.target.value });
+    this.setState({ name: event.target.value });
   }
 
   addNewUser(event) {
     event.preventDefault();
-    if (this.state.username.length > 0) {
+    if (this.state.name.length === 0) alert("You should provide your name");
+    else {
+      fetch(`/login?name=${encodeURIComponent(this.state.name)}`)
+        .then(response => response.json())
+        .then(state => this.setState(state));
+
       this.props.onUser(this.state.isUser);
       this.setState({ isUser: true });
-    } else {
-      alert("You should provide your name");
     }
   }
 

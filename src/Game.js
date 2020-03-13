@@ -1,31 +1,7 @@
 import React from "react";
 import "./Game.css";
 import Login from "./Login";
-
-const CELL_SIZE = 100;
-const WIDTH = 500;
-const HEIGHT = 500;
-
-class Cell extends React.Component {
-  render() {
-    const { x, y, color, value, isEnabled } = this.props;
-    return (
-      <div
-        className="Cell"
-        style={{
-          left: `${CELL_SIZE * x}px`,
-          top: `${CELL_SIZE * y}px`,
-          width: `${CELL_SIZE}px`,
-          height: `${CELL_SIZE}px`,
-          background: `${color}`,
-          pointerEvents: isEnabled ? `auto` : `none`
-        }}
-      >
-        <h1>{value}</h1>
-      </div>
-    );
-  }
-}
+import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 
 class Game extends React.Component {
   constructor() {
