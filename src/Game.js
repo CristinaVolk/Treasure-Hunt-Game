@@ -46,18 +46,17 @@ class Game extends React.Component {
   }
 
   generateTresures() {
-    let arr_tresures = [];
+    let array_tresures = [];
     let i = 0;
     while (i < 3) {
       let x = this.getRandomInt(5);
       let y = this.getRandomInt(5);
-      if (this.check_exists(y, x, arr_tresures)) continue;
+      if (this.check_exists(y, x, array_tresures)) continue;
       this.board[y][x] = true;
-      arr_tresures.push({ y, x });
+      array_tresures.push({ y, x });
       i++;
     }
-    console.log(arr_tresures);
-    return arr_tresures;
+    return array_tresures;
   }
 
   getElementOffset() {
@@ -127,7 +126,6 @@ class Game extends React.Component {
       }
       val_cell_arr.push(val_cell);
     });
-    console.log(val_cell_arr);
 
     return val_cell_arr;
   }
@@ -136,8 +134,6 @@ class Game extends React.Component {
     let cells_values = this.state.cells;
 
     let user_answers = this.user.selected_answers;
-
-    console.log(user_cells_values);
 
     let i = 0;
     user_answers.forEach(item => {
@@ -202,15 +198,9 @@ class Game extends React.Component {
       this.setState({
         cells: db.tresureMap
       });
-      console.log(
-        `User countTresure  this.user.score `,
-        this.user.countTresure,
-        this.user.score
-      );
 
       if (this.user.score === 8 || this.user.countTresure === 3) {
         this.user.results.push(this.user.score);
-        console.log(this.user.results.length);
 
         this.setState({
           cells: this.state.cells.map(cell => (cell.isEnabled = false))

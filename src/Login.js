@@ -8,8 +8,7 @@ class Login extends Component {
     this.handleChange = this.handleChange.bind(this);
   }
   state = {
-    name: "",
-    isUser: false
+    name: ""
   };
 
   handleChange(event) {
@@ -29,8 +28,6 @@ class Login extends Component {
         });
 
       this.props.onUser(this.state.name);
-
-      //this.setState({ isUser: true });
     }
   }
 
