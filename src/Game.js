@@ -3,6 +3,8 @@ import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 
+const db = require("./database");
+
 class Game extends React.Component {
   constructor() {
     super();
@@ -19,9 +21,10 @@ class Game extends React.Component {
   state = {
     cells: [],
     isRunning: false,
-    isUser: false,
+    name: null,
     isEnabled: false,
-    isGameStart: false
+    isGameStart: false,
+    topResults: null
   };
 
   makeEmptyBoard() {
@@ -68,6 +71,7 @@ class Game extends React.Component {
   }
 
   makeCells = () => {
+    this.user.countTresure = 0;
     let cells = [];
     let color = `#554562`;
     for (let y = 0; y < this.rows; y++) {
@@ -75,12 +79,13 @@ class Game extends React.Component {
         cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
       }
     }
+    db.treasureMap = cells;
     return cells;
   };
 
   check_neighbours() {
     let answers_arr = this.user.selected_answers;
-    let val_cell = "1";
+    let val_cell = `1`;
     let val_cell_arr = [];
 
     let diagonal_neighbors = [
@@ -99,15 +104,15 @@ class Game extends React.Component {
 
     answers_arr.forEach(element => {
       if (this.check_exists(element.y, element.x, this.tresures)) {
-        val_cell = "T";
-        this.user.score++;
+        val_cell = `T`;
+        this.user.countTresure++;
       } else {
         for (let i = 0; i < diagonal_neighbors.length; i++) {
           let x1 = element.x + diagonal_neighbors[i].x_n;
           let y1 = element.y + diagonal_neighbors[i].y_n;
 
           if (this.check_exists(y1, x1, this.tresures)) {
-            val_cell = "2";
+            val_cell = `2`;
             break;
           }
         }
@@ -115,7 +120,7 @@ class Game extends React.Component {
           let x1 = element.x + side_neighbors[i].x_n;
           let y1 = element.y + side_neighbors[i].y_n;
           if (this.check_exists(y1, x1, this.tresures)) {
-            val_cell = "3";
+            val_cell = `3`;
             break;
           }
         }
@@ -128,8 +133,10 @@ class Game extends React.Component {
   }
 
   changeCells = user_cells_values => {
-    let user_answers = this.user.selected_answers;
     let cells_values = this.state.cells;
+
+    let user_answers = this.user.selected_answers;
+
     console.log(user_cells_values);
 
     let i = 0;
@@ -164,7 +171,7 @@ class Game extends React.Component {
 
   handleClick = event => {
     this.count++;
-    let trials;
+
     console.log(this.count);
     const elemOffset = this.getElementOffset();
 
@@ -187,17 +194,28 @@ class Game extends React.Component {
     }
 
     if (this.count === 3) {
-      trials++;
+      this.user.score++;
+
       let user_cell_values = this.check_neighbours();
+      db.tresureMap = this.changeCells(user_cell_values, this.user.score);
 
       this.setState({
-        cells: this.changeCells(user_cell_values)
+        cells: db.tresureMap
       });
-      console.log("User score ", this.user.score);
+      console.log(
+        `User countTresure  this.user.score `,
+        this.user.countTresure,
+        this.user.score
+      );
 
-      if (this.user.score === 3) {
+      if (this.user.score === 8 || this.user.countTresure === 3) {
+        this.user.results.push(this.user.score);
+        console.log(this.user.results.length);
+
+        this.setState({
+          cells: this.state.cells.map(cell => (cell.isEnabled = false))
+        });
         this.setState({ isRunning: false });
-        this.user.results.push(trials);
       }
 
       this.count = 0;
@@ -209,8 +227,9 @@ class Game extends React.Component {
     this.user = {
       board: this.board,
       selected_answers: [],
-      score: 0,
-      results: []
+      countTresure: 0,
+      results: [],
+      score: 0
     };
 
     this.setState({ isGameStart: true });
@@ -222,6 +241,7 @@ class Game extends React.Component {
     this.setState({ cells: this.makeCells() });
 
     this.count = 0;
+    this.user.countTresure = 0;
     this.user.score = 0;
   };
 
@@ -234,16 +254,23 @@ class Game extends React.Component {
     this.setState({ cells: this.makeCells() });
   };
 
-  newUser = () => {
-    this.setState({ isUser: true });
+  newUser = nameFromLogin => {
+    this.setState({ name: nameFromLogin });
     this.user = this.board;
+    this.user.name = nameFromLogin;
+  };
+
+  displayResult = () => {
+    const results = fetch(`/top/score`)
+      .then(response => response.json())
+      .then(topResults => this.setState(topResults));
   };
 
   render() {
-    const { cells, isRunning, isUser, isGameStart } = this.state;
+    const { cells, isRunning, name, isGameStart } = this.state;
     return (
       <div>
-        {!isUser ? (
+        {!name ? (
           <Login onUser={this.newUser} />
         ) : (
           <div>
@@ -275,17 +302,34 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {this.trials === 10 ? <div>{this.user.results.length}</div> : ""}
+              {this.user.results ? (
+                <div>
+                  Your score
+                  {this.user.results.map((result, index) => (
+                    <p key={index}>{result}</p>
+                  ))}
+                </div>
+              ) : (
+                ""
+              )}
               {!isGameStart && !isRunning ? (
-                <button className="button" onClick={this.runGame}>
+                <button
+                  className="button"
+                  onClick={this.runGame}
+                  style={{ size: `primary` }}
+                >
                   Run Game
                 </button>
               ) : (
                 ""
               )}
               {!isRunning && isGameStart ? (
-                <button className="button" onClick={this.runCall}>
-                  Run Set
+                <button
+                  className="button"
+                  onClick={this.runCall}
+                  style={{ size: `primary` }}
+                >
+                  <p>Press the button to run the Set</p>
                 </button>
               ) : (
                 ""
