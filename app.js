@@ -3,7 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const PORT = 3005;
 
-const db = require("./database");
+const db = require("./src/database");
 
 const app = express();
 

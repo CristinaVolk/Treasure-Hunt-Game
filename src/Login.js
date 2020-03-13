@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 
 class Login extends Component {
   constructor(props) {
@@ -19,12 +20,17 @@ class Login extends Component {
     event.preventDefault();
     if (this.state.name.length === 0) alert("You should provide your name");
     else {
-      fetch(`/user?name=${encodeURIComponent(this.state.name)}`)
-        .then(response => response.json())
-        .then(state => this.setState(state));
+      axios
+        .post("http://localhost:3005/user", {
+          name: this.state.name
+        })
+        .then(response => {
+          console.log(response, "User added!");
+        });
 
-      this.props.onUser(this.state.isUser);
-      this.setState({ isUser: true });
+      this.props.onUser(this.state.name);
+
+      //this.setState({ isUser: true });
     }
   }
 

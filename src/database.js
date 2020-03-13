@@ -2,17 +2,11 @@ const SCORE_LIMIT = 10;
 const TREASURE = "T";
 
 let users = [];
-const treasureMap = [
-  /*{ x: 1, y: 1, value: TREASURE },
-  { x: 2, y: 1, value: 1 },
-  { x: 3, y: 1, value: 2 },
-  { x: 4, y: 1, value: 3 },
-  { x: 0, y: 1, value: TREASURE },
-  { x: 0, y: 4, value: TREASURE }*/
-];
+const treasureMap = [];
 
 const getBestScores = () => users.sort((a, b) => a > b).slice(0, SCORE_LIMIT);
 const addUser = name => users.push({ name, score: 0, movements: [] });
+const findUser = name => users.find(user => user.name === name);
 
 const userCanMove = (name, x, y) => {
   const foundUser = users.find(user => user.name === name);
@@ -49,5 +43,6 @@ module.exports = {
   getBestScores,
   addUser,
   makeMove,
-  treasureMap
+  treasureMap,
+  users
 };
