@@ -1,8 +1,11 @@
 {
-  "name": "react-gameoflife",
+  "name": "react-gameoftreasure",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "material-ui": "^0.20.2",
     "react": "^16.3.2",
     "react-bootstrap": "^0.32.4",
@@ -10,19 +13,13 @@
     "react-scripts": "1.1.4"
   },
   "scripts": {
-    "server": "node-env-run server --exec nodemon | pino-colada",
+    "server:watch": "nodemon app.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "express-pino-logger": "^4.0.0",
-    "node-env-run": "^3.0.2",
-    "nodemon": "^2.0.2",
-    "npm-run-all": "^4.1.5",
-    "pino-colada": "^1.5.1"
+    "nodemon": "^2.0.2"
   }
 }

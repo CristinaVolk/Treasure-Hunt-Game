@@ -19,7 +19,7 @@ class Login extends Component {
     event.preventDefault();
     if (this.state.name.length === 0) alert("You should provide your name");
     else {
-      fetch(`/login?name=${encodeURIComponent(this.state.name)}`)
+      fetch(`/user?name=${encodeURIComponent(this.state.name)}`)
         .then(response => response.json())
         .then(state => this.setState(state));
 
@@ -32,7 +32,7 @@ class Login extends Component {
     return (
       <form onSubmit={this.addNewUser}>
         <label>
-          Name:
+          Name :
           <input
             type="text"
             value={this.state.value}
