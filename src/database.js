@@ -4,9 +4,16 @@ const TREASURE = "T";
 let users = [];
 const treasureMap = [];
 
-const getBestScores = () => users.sort((a, b) => a > b).slice(0, SCORE_LIMIT);
-const addUser = name => users.push({ name, score: 0, movements: [] });
-const findUser = name => users.find(user => user.name === name);
+const getBestScores = user_name => {
+  let topResults;
+  const foundUser = findUserByName(user_name);
+  if (foundUser) {
+    topResults = foundUser.scores.sort((a, b) => a > b).slice(0, SCORE_LIMIT);
+  }
+  return topResults;
+};
+const addUser = name => users.push({ name, scores: [], movements: [] });
+const findUserByName = name => users.find(user => user.name === name);
 
 const userCanMove = (name, x, y) => {
   const foundUser = users.find(user => user.name === name);
@@ -43,6 +50,6 @@ module.exports = {
   getBestScores,
   addUser,
   makeMove,
-  treasureMap,
-  users
+  findUserByName,
+  treasureMap
 };

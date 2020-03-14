@@ -2,6 +2,7 @@ import React from "react";
 import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
+import axios from "axios";
 
 const db = require("./database");
 
@@ -14,20 +15,23 @@ class Game extends React.Component {
     this.tresures = [];
     this.user = null;
     this.count = 0;
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
+    this.newUser = this.newUser.bind(this);
   }
 
   state = {
     cells: [],
     isRunning: false,
-    name: null,
+    name: "",
     isEnabled: false,
     isGameStart: false,
-    topResults: null
+    topResults: null,
+    isUser: false
   };
 
-  makeEmptyBoard() {
+  makeEmptyBoard = () => {
     let board = [];
     for (let y = 0; y < this.rows; y++) {
       board[y] = [];
@@ -36,16 +40,16 @@ class Game extends React.Component {
       }
     }
     return board;
-  }
+  };
 
   check_exists = (y, x, arr) =>
     arr.some(item => item.x === x && item.y === y) ? true : false;
 
-  getRandomInt(max) {
+  getRandomInt = max => {
     return Math.floor(Math.random() * Math.floor(max));
-  }
+  };
 
-  generateTresures() {
+  generateTresures = () => {
     let array_tresures = [];
     let i = 0;
     while (i < 3) {
@@ -57,9 +61,9 @@ class Game extends React.Component {
       i++;
     }
     return array_tresures;
-  }
+  };
 
-  getElementOffset() {
+  getElementOffset = () => {
     const rect = this.boardRef.getBoundingClientRect();
     const doc = document.documentElement;
 
@@ -67,7 +71,7 @@ class Game extends React.Component {
       x: rect.left + window.pageXOffset - doc.clientLeft,
       y: rect.top + window.pageYOffset - doc.clientTop
     };
-  }
+  };
 
   makeCells = () => {
     this.user.countTresure = 0;
@@ -82,7 +86,7 @@ class Game extends React.Component {
     return cells;
   };
 
-  check_neighbours() {
+  check_neighbours = () => {
     let answers_arr = this.user.selected_answers;
     let val_cell = `1`;
     let val_cell_arr = [];
@@ -128,7 +132,7 @@ class Game extends React.Component {
     });
 
     return val_cell_arr;
-  }
+  };
 
   changeCells = user_cells_values => {
     let cells_values = this.state.cells;
@@ -215,6 +219,7 @@ class Game extends React.Component {
 
   runGame = () => {
     this.user = {
+      name: this.state.name,
       board: this.board,
       selected_answers: [],
       countTresure: 0,
@@ -223,6 +228,7 @@ class Game extends React.Component {
     };
 
     this.setState({ isGameStart: true });
+    console.log(this.user.name);
   };
 
   runCall = () => {
@@ -244,24 +250,44 @@ class Game extends React.Component {
     this.setState({ cells: this.makeCells() });
   };
 
-  newUser = nameFromLogin => {
-    this.setState({ name: nameFromLogin });
-    this.user = this.board;
-    this.user.name = nameFromLogin;
+  newUser = newValue => {
+    this.setState({ name: newValue });
+  };
+
+  handleSubmit = () => {
+    if (this.state.name.length === 0) alert("You should provide your name");
+    else {
+      axios
+        .post("http://localhost:3005/user", {
+          name: this.state.name
+        })
+        .then(response => {
+          console.log(response, "User added!");
+        });
+      this.setState({ isUser: true });
+    }
   };
 
   displayResult = () => {
-    const results = fetch(`/top/score`)
+    axios
+      .get(`http://localhost:3005/scores/top/${this.user.name}`)
+      .then(results => console.log(results));
+    /*const results = fetch(`/top/score`)
       .then(response => response.json())
-      .then(topResults => this.setState(topResults));
+      .then(topResults => this.setState(topResults));*/
   };
 
   render() {
-    const { cells, isRunning, name, isGameStart } = this.state;
+    const { cells, isRunning, name, isGameStart, isUser } = this.state;
+
     return (
       <div>
-        {!name ? (
-          <Login onUser={this.newUser} />
+        {!isUser ? (
+          <Login
+            onUser={this.newUser}
+            onHandleSubmit={this.handleSubmit}
+            name={name}
+          />
         ) : (
           <div>
             <div
@@ -292,21 +318,21 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {this.user.results ? (
+              {/*this.user.results ? (
                 <div>
                   Your score
-                  {this.user.results.map((result, index) => (
-                    <p key={index}>{result}</p>
+                  {this.displayResult() /*this.user.results.map((result, index) => (
+                    <p key={index}>{result}
                   ))}
                 </div>
               ) : (
                 ""
-              )}
+              )*/}
               {!isGameStart && !isRunning ? (
                 <button
                   className="button"
                   onClick={this.runGame}
-                  style={{ size: `primary` }}
+                  style={{ fontSize: `24px` }}
                 >
                   Run Game
                 </button>
@@ -317,7 +343,7 @@ class Game extends React.Component {
                 <button
                   className="button"
                   onClick={this.runCall}
-                  style={{ size: `primary` }}
+                  style={{ fontSize: `24px` }}
                 >
                   <p>Press the button to run the Set</p>
                 </button>

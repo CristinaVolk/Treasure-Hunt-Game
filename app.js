@@ -10,8 +10,22 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get("/scores/top", (req, res) => {
-  res.json(db.getBestScores());
+app.get("/scores/top/:name", (req, res) => {
+  const { name } = req.params;
+  try {
+    const results = db.getBestScores(name);
+
+    res.send(results);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.get("/user/:name", (req, res) => {
+  const { name } = req.params;
+
+  const user = db.findUserByName(name);
+  res.send(user.name);
 });
 
 app.post("/user", (req, res) => {
