@@ -10,15 +10,14 @@ app.use(cors());
 
 var corsOptions = {
   origin: "http://localhost:3000",
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200
 };
 
 app.get("/scores/top/:name", cors(corsOptions), (req, res, body) => {
   const { name } = req.params;
   results = db.getBestScores(name);
 
-  //res.json(JSON.parse(body));
-  res.json({ msg: "This is CORS-enabled for only example.com." });
+  res.json(JSON.parse(body));
 });
 
 app.get("/user/:name", (req, res) => {
@@ -45,17 +44,15 @@ app.post("/user/move", (req, res) => {
   res.json(result);
 });
 
-/*app.post("/user/move", (req, res) => {
+app.post("/user/move", (req, res) => {
   const MOVEMENT_LIMIT = 3;
 
   const { name, movements } = req.body;
 
-  const result = movements
-    .slice(0, MOVEMENT_LIMIT)
-    .map(({ x, y }) => db.makeMove(name, x, y));
+  map(({ x, y }) => db.makeMove(name, x, y));
 
   res.json(result);
-});*/
+});
 
 app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT}`);

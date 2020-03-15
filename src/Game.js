@@ -20,7 +20,6 @@ class Game extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
     this.newUser = this.newUser.bind(this);
-    //this.fetch_user_results = this.fetch_user_results.bind(this);
   }
 
   state = {
@@ -186,18 +185,6 @@ class Game extends React.Component {
 
     this.setState({ isGameStart: true });
   };
-
-  /*fetch_user_results = () => {
-    let user_results;
-    axios
-      .get(`http://localhost:3005/user/${this.user.name}`)
-      .then(user => {
-        console.log(user.scores);
-        user_results = user.scores;
-      })
-      .catch(err => console.log(err));
-    return user_results;
-  };*/
 
   runCall = () => {
     this.treasures = gameLogic.generateTreasures();
