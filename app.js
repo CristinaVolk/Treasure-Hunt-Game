@@ -4,21 +4,20 @@ const bodyParser = require("body-parser");
 const PORT = 3005;
 
 const db = require("./src/database");
-
 const app = express();
-
-app.use(cors());
 app.use(bodyParser.json());
+app.use(cors());
 
-app.get("/scores/top/:name", (req, res) => {
+var corsOptions = {
+  origin: "http://localhost:3000",
+  optionsSuccessStatus: 200
+};
+
+app.get("/scores/top/:name", cors(corsOptions), (req, res, body) => {
   const { name } = req.params;
-  try {
-    const results = db.getBestScores(name);
+  results = db.getBestScores(name);
 
-    res.json(results);
-  } catch (err) {
-    console.log(err);
-  }
+  res.json(JSON.parse(body));
 });
 
 app.get("/user/:name", (req, res) => {
@@ -32,9 +31,17 @@ app.get("/user/:name", (req, res) => {
 app.post("/user", (req, res) => {
   const { name } = req.body;
 
-  db.addUser(name);
-
+  const user = db.addUser(name);
+  if (user) console.log(user);
   res.sendStatus(201);
+});
+
+app.post("/user/move", (req, res) => {
+  const { name, movements } = req.body;
+
+  const result = db.makeMove(name, movements);
+
+  res.json(result);
 });
 
 app.post("/user/move", (req, res) => {
@@ -42,9 +49,7 @@ app.post("/user/move", (req, res) => {
 
   const { name, movements } = req.body;
 
-  const result = movements
-    .slice(0, MOVEMENT_LIMIT)
-    .map(({ x, y }) => db.makeMove(name, x, y));
+  map(({ x, y }) => db.makeMove(name, x, y));
 
   res.json(result);
 });

@@ -1,8 +1,16 @@
+const game_logic = require("./game_logic");
+
 const SCORE_LIMIT = 10;
-const TREASURE = "T";
 
 let users = [];
-const treasureMap = [];
+const treasureMap = []; //cells [x,y,value]
+
+const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
+
+const getUserScore = user_name => {
+  const user = findUserByName(user_name);
+  return user ? user.scores : undefined;
+};
 
 const getBestScores = user_name => {
   let topResults;
@@ -12,38 +20,29 @@ const getBestScores = user_name => {
   }
   return topResults;
 };
+
 const addUser = name => users.push({ name, scores: [], movements: [] });
+
 const findUserByName = name => users.find(user => user.name === name);
 
-const userCanMove = (name, x, y) => {
-  const foundUser = users.find(user => user.name === name);
-  let foundMovement;
-
-  if (foundUser) {
-    foundMovement = foundUser.movements.find(
-      movement => movement.x === x && movement.y === y
-    );
-  }
-
-  return !foundMovement;
-};
-
-const makeMove = (name, positionX, positionY) => {
-  const field = treasureMap.find(
-    ({ x, y }) => x === positionX && y === positionY
-  );
-
+const makeMove = (name, user_movements) => {
   const currentUserIndex = users.findIndex(user => user.name === name);
+  const revealed_answers = game_logic.check_neighbours(user_movements);
 
-  if (currentUserIndex !== -1 && userCanMove(name, positionX, positionY)) {
-    users[currentUserIndex].movements.push({ positionX, positionY });
+  if (currentUserIndex !== -1) {
+    user_movements.forEach(movement => {
+      users[currentUserIndex].movements.push(movement);
+    });
 
-    if (field.value === TREASURE) {
-      users[currentUserIndex].score += 1;
-    }
+    revealed_answers.forEach(field => {
+      const mapFieldIndex = treasureMap.findIndex(
+        mapField => mapField.x === field.x && mapField.y === field.y
+      );
+      treasureMap[mapFieldIndex].value = field.value;
+    });
   }
 
-  return field;
+  return revealed_answers;
 };
 
 module.exports = {
@@ -51,5 +50,6 @@ module.exports = {
   addUser,
   makeMove,
   findUserByName,
-  treasureMap
+  get_treasureMap,
+  getUserScore
 };
