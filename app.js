@@ -15,7 +15,7 @@ app.get("/scores/top/:name", (req, res) => {
   try {
     const results = db.getBestScores(name);
 
-    res.send(results);
+    res.json(results);
   } catch (err) {
     console.log(err);
   }
@@ -25,7 +25,8 @@ app.get("/user/:name", (req, res) => {
   const { name } = req.params;
 
   const user = db.findUserByName(name);
-  res.send(user.name);
+  console.log(user);
+  res.send(user);
 });
 
 app.post("/user", (req, res) => {

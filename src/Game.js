@@ -19,6 +19,7 @@ class Game extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
     this.newUser = this.newUser.bind(this);
+    this.fetch_user_results = this.fetch_user_results.bind(this);
   }
 
   state = {
@@ -27,6 +28,7 @@ class Game extends React.Component {
     name: "",
     isEnabled: false,
     isGameStart: false,
+    isGamFinished: false,
     topResults: null,
     isUser: false
   };
@@ -217,6 +219,25 @@ class Game extends React.Component {
     }
   };
 
+  fetch_user_results = () => {
+    let user_results;
+
+    axios
+      .get(`localhost:3005/user/${this.user.name}`, function(req, res) {
+        res.header("Access-Control-Allow-Origin: *");
+        res.header(
+          "Access-Control-Allow-Headers",
+          "Origin, X-Requested-With, Content-Type, Accept"
+        );
+      })
+      .then(user => {
+        console.log(user.scores);
+        user_results = user.scores;
+      })
+      .catch(err => console.log(err));
+    return user_results;
+  };
+
   runGame = () => {
     this.user = {
       name: this.state.name,
@@ -239,6 +260,7 @@ class Game extends React.Component {
     this.count = 0;
     this.user.countTresure = 0;
     this.user.score = 0;
+    this.user.results = this.fetch_user_results();
   };
 
   stopGame = () => {
@@ -269,16 +291,22 @@ class Game extends React.Component {
   };
 
   displayResult = () => {
-    axios
-      .get(`http://localhost:3005/scores/top/${this.user.name}`)
-      .then(results => console.log(results));
-    /*const results = fetch(`/top/score`)
+    const results = axios
+      .get(`localhost:3005/top/score`)
       .then(response => response.json())
-      .then(topResults => this.setState(topResults));*/
+      .then(topResults => this.setState(topResults));
+    return results;
   };
 
   render() {
-    const { cells, isRunning, name, isGameStart, isUser } = this.state;
+    const {
+      cells,
+      isRunning,
+      name,
+      isGameStart,
+      isGamFinished,
+      isUser
+    } = this.state;
 
     return (
       <div>
@@ -318,16 +346,16 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {/*this.user.results ? (
+              {isGamFinished ? (
                 <div>
                   Your score
-                  {this.displayResult() /*this.user.results.map((result, index) => (
-                    <p key={index}>{result}
+                  {this.displayResult.map((result, index) => (
+                    <p key={index}>{result}</p>
                   ))}
                 </div>
               ) : (
                 ""
-              )*/}
+              )}
               {!isGameStart && !isRunning ? (
                 <button
                   className="button"
