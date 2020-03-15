@@ -4,6 +4,8 @@ const TREASURE = "T";
 let users = [];
 const treasureMap = [];
 
+const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
+
 const getBestScores = user_name => {
   let topResults;
   const foundUser = findUserByName(user_name);
@@ -51,5 +53,5 @@ module.exports = {
   addUser,
   makeMove,
   findUserByName,
-  treasureMap
+  get_treasureMap
 };

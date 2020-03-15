@@ -9,16 +9,22 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
 
 app.get("/scores/top/:name", (req, res) => {
   const { name } = req.params;
-  try {
-    const results = db.getBestScores(name);
-
-    res.json(results);
-  } catch (err) {
-    console.log(err);
-  }
+  request(
+    { url: `http://localhost:3005/scores/top/${name}` },
+    (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        return res.status(500).json({ type: "error", message: err.message });
+      }
+      res.json(JSON.parse(body));
+    }
+  );
 });
 
 app.get("/user/:name", (req, res) => {

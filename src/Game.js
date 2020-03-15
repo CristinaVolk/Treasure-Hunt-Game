@@ -168,6 +168,8 @@ class Game extends React.Component {
       i++;
     });
 
+    db.get_treasureMap = cells_values;
+
     return cells_values;
   };
 
@@ -182,6 +184,8 @@ class Game extends React.Component {
 
     const x = Math.floor(offsetX / CELL_SIZE);
     const y = Math.floor(offsetY / CELL_SIZE);
+
+    this.runMove(x, y);
 
     const objIndex = this.state.cells.findIndex(
       obj => obj.y === y && obj.x === x
@@ -219,22 +223,10 @@ class Game extends React.Component {
     }
   };
 
-  fetch_user_results = () => {
+  fetch_user_results = async () => {
     let user_results;
-
-    axios
-      .get(`localhost:3005/user/${this.user.name}`, function(req, res) {
-        res.header("Access-Control-Allow-Origin: *");
-        res.header(
-          "Access-Control-Allow-Headers",
-          "Origin, X-Requested-With, Content-Type, Accept"
-        );
-      })
-      .then(user => {
-        console.log(user.scores);
-        user_results = user.scores;
-      })
-      .catch(err => console.log(err));
+    const response = await axios.get(`localhost:3005/user/${this.user.name}`);
+    console.log(response.data);
     return user_results;
   };
 
@@ -256,11 +248,21 @@ class Game extends React.Component {
     this.tresures = this.generateTresures();
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells() });
+    db.get_treasureMap = this.state.cells;
 
     this.count = 0;
     this.user.countTresure = 0;
     this.user.score = 0;
     this.user.results = this.fetch_user_results();
+  };
+
+  runMove = (user_position_x, user_postion_y) => {
+    axios
+      .post(`http://localhost:3005/user/move`, {
+        name: this.user.name,
+        movements: { user_position_x, user_postion_y }
+      })
+      .then(res => res.send("Movements added"));
   };
 
   stopGame = () => {
