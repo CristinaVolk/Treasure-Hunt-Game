@@ -17,6 +17,7 @@ app.get("/scores/top/:name", cors(corsOptions), (req, res, body) => {
   const { name } = req.params;
   results = db.getBestScores(name);
 
+
   res.json(results);
 });
 
@@ -37,12 +38,15 @@ app.post("/user", (req, res) => {
 });
 
 app.post("/user/move", (req, res) => {
+
   const { name, movements } = req.body;
 
   const result = db.makeMove(name, movements);
 
   res.json(result);
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT}`);
