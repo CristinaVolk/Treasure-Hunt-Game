@@ -8,8 +8,8 @@ const generateTreasures = () => {
   while (i < 3) {
     let x = getRandomInt(5);
     let y = getRandomInt(5);
-    if (check_exists(y, x, array_treasures)) continue;
-    this.board[y][x] = true;
+    if (check_exists(y, x, TREASURES)) continue;
+
     TREASURES.push({ y, x });
     i++;
   }
@@ -66,7 +66,7 @@ const check_neighbours = user_movements => {
       value: cellValue
     });
   });
-
+  console.log(revealedAnswers);
   return revealedAnswers;
 };
 
