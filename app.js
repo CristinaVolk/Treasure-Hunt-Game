@@ -17,7 +17,7 @@ app.get("/scores/top/:name", cors(corsOptions), (req, res, body) => {
   const { name } = req.params;
   results = db.getBestScores(name);
 
-  res.json(JSON.parse(body));
+  res.json(results);
 });
 
 app.get("/user/:name", (req, res) => {
@@ -40,16 +40,6 @@ app.post("/user/move", (req, res) => {
   const { name, movements } = req.body;
 
   const result = db.makeMove(name, movements);
-
-  res.json(result);
-});
-
-app.post("/user/move", (req, res) => {
-  const MOVEMENT_LIMIT = 3;
-
-  const { name, movements } = req.body;
-
-  map(({ x, y }) => db.makeMove(name, x, y));
 
   res.json(result);
 });

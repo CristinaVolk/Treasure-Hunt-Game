@@ -34,12 +34,12 @@ const makeMove = (name, user_movements) => {
       users[currentUserIndex].movements.push(movement);
     });
 
-    revealed_answers.forEach(field => {
+    /*revealed_answers.forEach(field => {
       const mapFieldIndex = treasureMap.findIndex(
         mapField => mapField.x === field.x && mapField.y === field.y
       );
       treasureMap[mapFieldIndex].value = field.value;
-    });
+    });*/
   }
 
   return revealed_answers;
