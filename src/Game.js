@@ -53,7 +53,6 @@ class Game extends React.Component {
     array_to_check.some(item => item.x === x && item.y === y) ? true : false;
 
   makeTreasures = () => {
-    let i = 0;
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         if (gameLogic.TREASURES.find(item => item.x === x && item.y === y))
