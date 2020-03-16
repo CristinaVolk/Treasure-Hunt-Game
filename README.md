@@ -78,7 +78,7 @@ example url with the defined name:
 - valid response: array of the sorted values in the scores array property
 
 ```
-[2,3,3,3,4,4,4,6,6,7]
+[]
 ```
 
 ### Get User

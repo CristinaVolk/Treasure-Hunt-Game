@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import "./App.css";
 
 export const CELL_SIZE = 100;
@@ -12,8 +12,8 @@ export default class Cell extends React.Component {
       <div
         className="Cell"
         style={{
-          left: `${CELL_SIZE * x}px`,
-          top: `${CELL_SIZE * y}px`,
+          left: `${CELL_SIZE * y}px`,
+          top: `${CELL_SIZE * x}px`,
           width: `${CELL_SIZE}px`,
           height: `${CELL_SIZE}px`,
           background: `${color}`,

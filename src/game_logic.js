@@ -1,3 +1,4 @@
+const db = require("./database");
 const TREASURES = [];
 
 const getRandomInt = max => {
@@ -8,15 +9,16 @@ const generateTreasures = () => {
   while (i < 3) {
     let x = getRandomInt(5);
     let y = getRandomInt(5);
-    if (check_exists(y, x, TREASURES)) continue;
+    if (check_exists(x, y, TREASURES)) continue;
 
-    TREASURES.push({ y, x });
+    TREASURES.push({ x, y });
     i++;
   }
+  console.log("Treasures : ", TREASURES);
   return TREASURES;
 };
 
-const check_exists = (y, x, map_array) =>
+const check_exists = (x, y, map_array) =>
   map_array.some(item => item.x === x && item.y === y) ? true : false;
 
 const check_neighbours = user_movements => {
@@ -38,14 +40,14 @@ const check_neighbours = user_movements => {
   ];
 
   user_movements.forEach(movement => {
-    if (check_exists(movement.y, movement.x, TREASURES)) {
+    if (check_exists(movement.x, movement.y, TREASURES)) {
       cellValue = `T`;
     } else {
       for (let i = 0; i < diagonal_neighbors.length; i++) {
         let x1 = movement.x + diagonal_neighbors[i].x_n;
         let y1 = movement.y + diagonal_neighbors[i].y_n;
 
-        if (check_exists(y1, x1, TREASURES)) {
+        if (check_exists(x1, y1, TREASURES)) {
           cellValue = `2`;
           break;
         }
@@ -53,7 +55,7 @@ const check_neighbours = user_movements => {
       for (let i = 0; i < side_neighbors.length; i++) {
         let x1 = movement.x + side_neighbors[i].x_n;
         let y1 = movement.y + side_neighbors[i].y_n;
-        if (check_exists(y1, x1, TREASURES)) {
+        if (check_exists(x1, y1, TREASURES)) {
           cellValue = `3`;
           break;
         }
@@ -61,12 +63,12 @@ const check_neighbours = user_movements => {
     }
 
     revealedAnswers.push({
-      positionY: movement.y,
-      positionX: movement.x,
+      positionX: movement.y,
+      positionY: movement.x,
       value: cellValue
     });
   });
-  console.log(revealedAnswers);
+  console.log("Rev Anx", revealedAnswers);
   return revealedAnswers;
 };
 
