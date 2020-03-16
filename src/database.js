@@ -1,25 +1,26 @@
 const game_logic = require("./game_logic");
-const colls = 5;
-const rows = 5;
+
+const COLLS = 5;
+const ROWS = 5;
 const SCORE_LIMIT = 10;
 
 let users = [];
-let treasureMap = []; //cells [x,y,value]
+let treasureMap = [];
 
 function generateTreasureMap() {
-  for (let x = 0; x < rows; x++) {
-    for (let y = 0; y < colls; y++) {
-      treasureMap.push({ x: x, y: y, value: "" });
+  for (let x = 0; x < ROWS; x++) {
+    for (let y = 0; y < COLLS; y++) {
+      [...treasureMap, { x: x, y: y, value: "" }];
     }
   }
   return treasureMap;
 }
 
-//const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
+const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
 
 const getUserScore = user_name => {
   const user = findUserByName(user_name);
-  return user ? user.scores : undefined;
+  return user ? user.scores : {};
 };
 
 const getBestScores = user_name => {
@@ -38,7 +39,9 @@ const findUserByName = name => users.find(user => user.name === name);
 const makeMove = (name, user_movements) => {
   console.log(treasureMap);
   const currentUserIndex = users.findIndex(user => user.name === name);
+
   const revealed_answers = game_logic.check_neighbours(user_movements);
+  console.log("rev", revealed_answers);
 
   if (currentUserIndex !== -1) {
     user_movements.forEach(movement => {
@@ -46,8 +49,10 @@ const makeMove = (name, user_movements) => {
     });
 
     revealed_answers.forEach(field => {
+      console.log(field.value);
       const mapFieldIndex = treasureMap.findIndex(
-        mapField => mapField.x === field.x && mapField.y === field.y
+        mapField =>
+          mapField.x === field.positionX && mapField.y === field.positionY
       );
       treasureMap[mapFieldIndex].value = field.value;
     });
@@ -58,9 +63,10 @@ const makeMove = (name, user_movements) => {
 
 module.exports = {
   getBestScores,
-  addUser,
   makeMove,
   findUserByName,
   getUserScore,
-  generateTreasureMap
+  generateTreasureMap,
+  addUser,
+  treasureMap
 };

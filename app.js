@@ -17,7 +17,6 @@ app.get("/scores/top/:name", cors(corsOptions), (req, res, body) => {
   const { name } = req.params;
   results = db.getBestScores(name);
 
-
   res.json(results);
 });
 
@@ -33,11 +32,11 @@ app.post("/user", (req, res) => {
   const { name } = req.body;
 
   const user = db.addUser(name);
-  if (user) console.log(user);
-  res.sendStatus(201);
+  if (user) res.sendStatus(201);
 });
 
 app.post("/user/move", (req, res) => {
+  console.log("map: ", db.treasureMap);
 
   const { name, movements } = req.body;
 
@@ -45,8 +44,6 @@ app.post("/user/move", (req, res) => {
 
   res.json(result);
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT}`);

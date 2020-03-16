@@ -18,13 +18,17 @@ class Game extends React.Component {
     this.cols = WIDTH / CELL_SIZE;
     this.board = this.makeEmptyBoard();
     this.user = null;
-    this.count = 0;
     this.treasureMap = [];
+    this.count = 0;
+
+    this.newUser = this.newUser.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
-    this.newUser = this.newUser.bind(this);
     this.runMove = this.runMove.bind(this);
+    this.runCall = this.runCall.bind(this);
+    this.endMove = this.endMove.bind(this);
+    this.stopGame = this.stopGame.bind(this);
   }
 
   state = {
@@ -81,7 +85,7 @@ class Game extends React.Component {
 
     for (let x = 0; x < this.rows; x++) {
       for (let y = 0; y < this.cols; y++) {
-        cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
+        [...cells, { x: x, y: y, color: color, value: "", isEnabled: true }];
       }
     }
 
@@ -170,7 +174,8 @@ class Game extends React.Component {
         this.user.countTreasure === MAX_TREASURES
       ) {
         this.user.results.push(this.user.score);
-        db.getUserScore(this.user.name).push(this.user.score);
+        let user_scores = db.getUserScore(this.user.name);
+        user_scores.push(this.user.score);
 
         this.setState({
           cells: this.state.cells.map(cell => (cell.isEnabled = false))
@@ -201,16 +206,15 @@ class Game extends React.Component {
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells() });
 
-    db.treasureMap = [];
-
     this.count = 0;
     this.user.countTreasure = 0;
     this.user.score = 0;
-    //this.user.results = db.getUserScore(this.user.name);
+    this.user.results = db.getUserScore(this.user.name);
   };
 
   runMove = movements => {
-    console.log(this.treasureMap, movements);
+    db.treasureMap = this.treasureMap;
+    console.log(db.treasureMap, movements);
     axios
       .post(`http://localhost:3005/user/move`, {
         name: this.user.name,

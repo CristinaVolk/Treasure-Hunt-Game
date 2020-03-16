@@ -8,7 +8,6 @@ class Login extends React.Component {
   }
 
   addNewUser = event => {
-    console.log(event.target.value);
     event.preventDefault();
     this.props.onUser(event.target.value);
   };
