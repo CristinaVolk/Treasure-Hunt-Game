@@ -1,11 +1,21 @@
 const game_logic = require("./game_logic");
-
+const colls = 5;
+const rows = 5;
 const SCORE_LIMIT = 10;
 
 let users = [];
-const treasureMap = []; //cells [x,y,value]
+let treasureMap = []; //cells [x,y,value]
 
-const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
+function generateTreasureMap() {
+  for (let x = 0; x < rows; x++) {
+    for (let y = 0; y < colls; y++) {
+      treasureMap.push({ x: x, y: y, value: "" });
+    }
+  }
+  return treasureMap;
+}
+
+//const get_treasureMap = isGameOn => (isGameOn ? treasureMap : []);
 
 const getUserScore = user_name => {
   const user = findUserByName(user_name);
@@ -26,6 +36,7 @@ const addUser = name => users.push({ name, scores: [], movements: [] });
 const findUserByName = name => users.find(user => user.name === name);
 
 const makeMove = (name, user_movements) => {
+  console.log(treasureMap);
   const currentUserIndex = users.findIndex(user => user.name === name);
   const revealed_answers = game_logic.check_neighbours(user_movements);
 
@@ -50,6 +61,6 @@ module.exports = {
   addUser,
   makeMove,
   findUserByName,
-  get_treasureMap,
-  getUserScore
+  getUserScore,
+  generateTreasureMap
 };

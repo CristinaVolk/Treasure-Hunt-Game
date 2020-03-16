@@ -19,6 +19,7 @@ class Game extends React.Component {
     this.board = this.makeEmptyBoard();
     this.user = null;
     this.count = 0;
+    this.treasureMap = [];
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
@@ -39,10 +40,10 @@ class Game extends React.Component {
 
   makeEmptyBoard() {
     let board = [];
-    for (let y = 0; y < this.rows; y++) {
-      board[y] = [];
-      for (let x = 0; x < this.cols; x++) {
-        board[y][x] = false;
+    for (let x = 0; x < this.rows; x++) {
+      board[x] = [];
+      for (let y = 0; y < this.cols; y++) {
+        board[x][y] = false;
       }
     }
 
@@ -56,9 +57,9 @@ class Game extends React.Component {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         if (gameLogic.TREASURES.find(item => item.x === x && item.y === y))
-          this.board[y][x] = true;
+          this.board[x][y] = true;
 
-        this.board[y][x] = false;
+        this.board[x][y] = false;
       }
     }
   };
@@ -77,30 +78,28 @@ class Game extends React.Component {
     this.user.countTreasure = 0;
     let cells = [];
     let color = `#554562`;
-    let treasureMap = [];
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
+
+    for (let x = 0; x < this.rows; x++) {
+      for (let y = 0; y < this.cols; y++) {
         cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
-        treasureMap.push({ y: y, x: x, value: "" });
       }
     }
-    db.treasureMap = treasureMap;
 
     return cells;
   };
 
   changeCells = user_cells_values => {
     let cells_values = this.state.cells;
-
+    console.log(user_cells_values);
+    console.log(cells_values);
     let user_answers = this.user.selected_answers;
 
     let i = 0;
     user_answers.forEach(item => {
       const objIndex = cells_values.findIndex(
-        obj => obj.y === item.y && obj.x === item.x
+        cell => cell.y === item.x && cell.x === item.y
       );
-      console.log(objIndex, cells_values[i]);
-      console.log(user_cells_values[i].value);
+      console.log(objIndex, cells_values[objIndex]);
 
       if (user_cells_values[i].value.includes(`T`)) {
         cells_values[objIndex].color = `#ee6c75`;
@@ -146,7 +145,7 @@ class Game extends React.Component {
       return;
     }
     if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
-      this.user.selected_answers.push({ y, x });
+      this.user.selected_answers.push({ x, y });
     }
 
     if (this.count === MAX_CLICKS) {
@@ -156,11 +155,11 @@ class Game extends React.Component {
 
       this.setState({ isUser: true });
 
-      let user_cell_values = gameLogic.check_neighbours(
+      let answers_to_show = gameLogic.check_neighbours(
         this.user.selected_answers
       );
 
-      const updated_cells = this.changeCells(user_cell_values, this.user.score);
+      const updated_cells = this.changeCells(answers_to_show, this.user.score);
 
       this.setState({
         cells: updated_cells
@@ -179,7 +178,7 @@ class Game extends React.Component {
         this.setState({ isRunning: false });
       }
 
-      this.stopMove();
+      this.endMove();
     }
   };
 
@@ -197,11 +196,12 @@ class Game extends React.Component {
   };
 
   runCall = () => {
+    this.treasureMap = db.generateTreasureMap();
     gameLogic.TREASURES = gameLogic.generateTreasures();
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells() });
 
-    db.get_treasureMap = [];
+    db.treasureMap = [];
 
     this.count = 0;
     this.user.countTreasure = 0;
@@ -209,18 +209,19 @@ class Game extends React.Component {
     //this.user.results = db.getUserScore(this.user.name);
   };
 
-  stopMove = () => {
-    this.count = 0;
-    this.user.selected_answers = [];
-  };
-
   runMove = movements => {
+    console.log(this.treasureMap, movements);
     axios
       .post(`http://localhost:3005/user/move`, {
         name: this.user.name,
         movements: movements
       })
       .then(response => console.log(response, "Movements added!"));
+  };
+
+  endMove = () => {
+    this.count = 0;
+    this.user.selected_answers = [];
   };
 
   handleSubmit = () => {
@@ -246,6 +247,7 @@ class Game extends React.Component {
   clear_board = () => {
     this.board = this.makeEmptyBoard();
     this.setState({ cells: this.makeCells() });
+    this.treasureMap = null;
   };
 
   displayResult = () => {
