@@ -10,7 +10,7 @@ let treasureMap = [];
 function generateTreasureMap() {
   for (let x = 0; x < ROWS; x++) {
     for (let y = 0; y < COLLS; y++) {
-      [...treasureMap, { x: x, y: y, value: "" }];
+      treasureMap.push({ x: x, y: y, value: "" });
     }
   }
   return treasureMap;

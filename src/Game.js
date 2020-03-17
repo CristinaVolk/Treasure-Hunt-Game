@@ -2,7 +2,7 @@ import React from "react";
 import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
-import axios from "axios";
+const axios = require("axios");
 
 const db = require("./database");
 const gameLogic = require("./game_logic");
@@ -40,6 +40,25 @@ class Game extends React.Component {
     isGameFinished: false,
     topResults: null,
     isUser: false
+  };
+
+  handleSubmit = async () => {
+    if (this.state.name.length === 0) alert("You should provide your name");
+    else {
+      try {
+        let response = await axios.post("http://localhost:3005/user", {
+          name: this.state.name
+        });
+        let user = await response.json();
+        if (user) this.setState({ isUser: true });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  newUser = newValue => {
+    this.setState({ name: newValue });
   };
 
   makeEmptyBoard() {
@@ -85,7 +104,7 @@ class Game extends React.Component {
 
     for (let x = 0; x < this.rows; x++) {
       for (let y = 0; y < this.cols; y++) {
-        [...cells, { x: x, y: y, color: color, value: "", isEnabled: true }];
+        cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
       }
     }
 
@@ -226,23 +245,6 @@ class Game extends React.Component {
   endMove = () => {
     this.count = 0;
     this.user.selected_answers = [];
-  };
-
-  handleSubmit = () => {
-    if (this.state.name.length === 0) alert("You should provide your name");
-    else {
-      axios
-        .post("http://localhost:3005/user", {
-          name: this.state.name
-        })
-        .then(response => {
-          console.log(response, "User added!");
-        });
-      this.setState({ isUser: true });
-    }
-  };
-  newUser = newValue => {
-    this.setState({ name: newValue });
   };
 
   stopGame = () => {

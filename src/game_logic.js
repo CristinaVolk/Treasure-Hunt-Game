@@ -1,4 +1,3 @@
-const db = require("./database");
 const TREASURES = [];
 
 const getRandomInt = max => {
