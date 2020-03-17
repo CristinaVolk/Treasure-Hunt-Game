@@ -44,13 +44,14 @@ app.post("/user", (req, res) => {
 });
 
 app.post("/user/move", (req, res) => {
-  console.log("map: ", db.treasureMap);
-
-  const { name, movements } = req.body;
-
-  const result = db.makeMove(name, movements);
-
-  res.json(result);
+  try {
+    const { name, movements, treasureMap, TREASURES } = req.body;
+    const result = db.makeMove(name, movements, treasureMap, TREASURES);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
 });
 
 app.listen(PORT, () => {

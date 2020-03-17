@@ -1,7 +1,9 @@
 # Treasure-Hunt-Game
 
 ## How to run the poject:
-```pull the project from the branch logic-implementation ```
+
+`pull the project from the branch logic-implementation`
+
 1. Run the command : `npm install` in the terminal.
 2. Run the command : `npm run server:watch` in the terminal in order to start the server on the localhost:3005
 3. Split the terminal and run the command: `npm start` in order to start React app on client
@@ -31,14 +33,30 @@ example content in a body:
 
 ```
 example content in a body:
+
 {
     "name": "kris",
     "movements": [
     	{"x":4,"y":1},
     	{"x":2,"y":2},
-    	{"x":0,"y":1}
-      ]
+    	{"x":0,"y":1}],
+
+   "treasureMap":[
+        {"x":0, "y": 0, "value": "" },
+        {"x":0, "y": 1, "value": "" },
+        {"x":0, "y": 2, "value": ""  },
+        {"x":0,"y": 3, "value": ""  },
+        {"x":0, "y": 4, "value": "" },
+        {"x":1, "y": 0, "value": "" },
+        {"x":1, "y": 4, "value": ""  },
+        {"x":2 ,"y": 0, "value": ""  },
+        {"x":2, "y": 1, "value": ""  },
+        {"x":2, "y": 2," value": ""  },
+        {"x":2, "y": 2, "value":""  },
+        {"x":4, "y": 2, "value": ""  }
+    ]
 }
+
 ```
 
 ```

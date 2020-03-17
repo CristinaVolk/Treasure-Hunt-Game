@@ -1,28 +1,30 @@
-const TREASURES = [];
+const db = require("./database");
 
 const getRandomInt = max => {
   return Math.floor(Math.random() * Math.floor(max));
 };
 const generateTreasures = () => {
+  let treasures = [];
   let i = 0;
   while (i < 3) {
     let x = getRandomInt(5);
     let y = getRandomInt(5);
-    if (check_exists(x, y, TREASURES)) continue;
+    if (check_exists(x, y, treasures)) continue;
 
-    TREASURES.push({ x, y });
+    treasures.push({ x, y });
     i++;
   }
-  console.log("Treasures : ", TREASURES);
-  return TREASURES;
+  console.log("Treasures : ", treasures);
+  return treasures;
 };
 
-const check_exists = (x, y, map_array) =>
-  map_array.some(item => item.x === x && item.y === y) ? true : false;
+const check_exists = (x, y, map_array) => {
+  return map_array.find(item => item.x === x && item.y === y);
+};
 
-const check_neighbours = user_movements => {
+const check_neighbours = (user_movements, TREASURES) => {
   let cellValue = `1`;
-  let revealedAnswers = []; //
+  let revealedAnswers = [];
 
   let diagonal_neighbors = [
     { y_n: -1, x_n: -1 },
@@ -39,6 +41,7 @@ const check_neighbours = user_movements => {
   ];
 
   user_movements.forEach(movement => {
+    console.log("movement ", movement);
     if (check_exists(movement.x, movement.y, TREASURES)) {
       cellValue = `T`;
     } else {
@@ -67,13 +70,11 @@ const check_neighbours = user_movements => {
       value: cellValue
     });
   });
-  console.log("Rev Anx", revealedAnswers);
   return revealedAnswers;
 };
 
 module.exports = {
   check_exists,
   check_neighbours,
-  generateTreasures,
-  TREASURES
+  generateTreasures
 };

@@ -2,8 +2,8 @@ import React from "react";
 import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
-const axios = require("axios");
 
+const axios = require("axios");
 const db = require("./database");
 const gameLogic = require("./game_logic");
 
@@ -18,7 +18,7 @@ class Game extends React.Component {
     this.cols = WIDTH / CELL_SIZE;
     this.board = this.makeEmptyBoard();
     this.user = null;
-    this.treasureMap = [];
+    (this.TREASURES = []), (this.treasureMap = []);
     this.count = 0;
 
     this.newUser = this.newUser.bind(this);
@@ -49,8 +49,8 @@ class Game extends React.Component {
         let response = await axios.post("http://localhost:3005/user", {
           name: this.state.name
         });
-        let user = await response.json();
-        if (user) this.setState({ isUser: true });
+        //let user = await response.json({ user });
+        if (response) this.setState({ isUser: true });
       } catch (error) {
         console.error(error);
       }
@@ -79,7 +79,7 @@ class Game extends React.Component {
   makeTreasures = () => {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        if (gameLogic.TREASURES.find(item => item.x === x && item.y === y))
+        if (this.TREASURES.find(item => item.x === x && item.y === y))
           this.board[x][y] = true;
 
         this.board[x][y] = false;
@@ -179,7 +179,8 @@ class Game extends React.Component {
       this.setState({ isUser: true });
 
       let answers_to_show = gameLogic.check_neighbours(
-        this.user.selected_answers
+        this.user.selected_answers,
+        this.TREASURES
       );
 
       const updated_cells = this.changeCells(answers_to_show, this.user.score);
@@ -221,7 +222,7 @@ class Game extends React.Component {
 
   runCall = () => {
     this.treasureMap = db.generateTreasureMap();
-    gameLogic.TREASURES = gameLogic.generateTreasures();
+    this.TREASURES = gameLogic.generateTreasures();
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells() });
 
@@ -232,12 +233,13 @@ class Game extends React.Component {
   };
 
   runMove = movements => {
-    db.treasureMap = this.treasureMap;
-    console.log(db.treasureMap, movements);
+    console.log(this.treasureMap);
     axios
       .post(`http://localhost:3005/user/move`, {
         name: this.user.name,
-        movements: movements
+        movements: movements,
+        treasureMap: this.treasureMap,
+        TREASURES: this.TREASURES
       })
       .then(response => console.log(response, "Movements added!"));
   };
@@ -253,7 +255,7 @@ class Game extends React.Component {
   clear_board = () => {
     this.board = this.makeEmptyBoard();
     this.setState({ cells: this.makeCells() });
-    this.treasureMap = null;
+    //this.treasureMap = null;
   };
 
   displayResult = () => {
