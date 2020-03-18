@@ -180,9 +180,8 @@ class Game extends React.Component {
       this.TREASURES
     );
 
-    answers_to_show.map(answer => {
+    answers_to_show.array.forEach(answer => {
       if (answer.value === `T`) this.user.countTreasure++;
-      console.log("countTreasure:", this.user.countTreasure);
     });
 
     const updated_cells = this.changeCells(answers_to_show, this.user.score);
@@ -202,11 +201,7 @@ class Game extends React.Component {
   };
 
   handleClick = event => {
-    console.log("count", this.count++);
-    console.log("countTreasure", this.countTreasure++);
-
     const elemOffset = this.getElementOffset();
-
     const pointOnMap = this.obtainCoordinatesFromClick(event, elemOffset);
 
     if (this.ifCellDisabled(pointOnMap)) return;
@@ -223,7 +218,6 @@ class Game extends React.Component {
     if (this.count === MAX_CLICKS) {
       this.user.score++;
       this.runMove(this.user.selected_answers);
-
       this.update_cells();
 
       if (
@@ -231,10 +225,6 @@ class Game extends React.Component {
         this.user.countTreasure === MAX_TREASURES
       ) {
         this.updateScore();
-
-        let user_scores = db.getUserScore(this.user.name);
-        this.user.results = user_scores;
-
         this.end_call();
       }
       this.endMove();
@@ -247,7 +237,6 @@ class Game extends React.Component {
       board: this.board,
       selected_answers: [],
       countTreasure: 0,
-      results: [],
       score: 0
     };
     this.setState({ isUser: true });
@@ -349,7 +338,7 @@ class Game extends React.Component {
               {isGameFinished ? (
                 <div>
                   Your score
-                  {this.user.results.map((result, index) => {
+                  {this.displayResult.map((result, index) => {
                     return <p key={index}>{result}</p>;
                   })}
                 </div>

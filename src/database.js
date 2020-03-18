@@ -18,7 +18,6 @@ function generateTreasureMap() {
 
 const getUserScore = user_name => {
   const user = findUserByName(user_name);
-  console.log(user);
   return user ? user.scores : [];
 };
 
@@ -33,11 +32,7 @@ const getBestScores = user_name => {
 
 const addUser = name => users.push({ name, scores: [], movements: [] });
 
-const findUserByName = name => {
-  console.log("users:", users);
-
-  return users.find(user => user.name === name);
-};
+const findUserByName = name => users.find(user => user.name === name);
 
 const makeMove = (name, user_movements, treasureMap, TREASURES) => {
   const currentUserIndex = users.findIndex(user => user.name === name);
