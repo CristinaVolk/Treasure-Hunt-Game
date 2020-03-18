@@ -3,6 +3,7 @@ const db = require("./database");
 const getRandomInt = max => {
   return Math.floor(Math.random() * Math.floor(max));
 };
+
 const generateTreasures = () => {
   let treasures = [];
   let i = 0;
@@ -63,8 +64,8 @@ const check_neighbours = (user_movements, TREASURES) => {
     }
 
     revealedAnswers.push({
-      positionX: movement.y,
-      positionY: movement.x,
+      positionX: movement.x,
+      positionY: movement.y,
       value: cellValue
     });
   });

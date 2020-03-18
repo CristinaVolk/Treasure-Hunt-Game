@@ -18,7 +18,8 @@ function generateTreasureMap() {
 
 const getUserScore = user_name => {
   const user = findUserByName(user_name);
-  return user ? user.scores : {};
+  console.log(user.scores);
+  return user ? user.scores : [];
 };
 
 const getBestScores = user_name => {
