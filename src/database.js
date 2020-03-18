@@ -36,12 +36,14 @@ const addUser = name => users.push({ name, scores: [], movements: [] });
 const findUserByName = name => users.find(user => user.name === name);
 
 const makeMove = (name, user_movements, treasureMap, TREASURES) => {
+  console.log(user_movements);
   const currentUserIndex = users.findIndex(user => user.name === name);
 
   const revealed_answers = game_logic.check_neighbours(
     user_movements,
     TREASURES
   );
+  console.log(revealed_answers);
 
   if (currentUserIndex !== -1) {
     user_movements.forEach(movement => {
@@ -52,9 +54,11 @@ const makeMove = (name, user_movements, treasureMap, TREASURES) => {
       const mapFieldIndex = treasureMap.findIndex(mapField => {
         return mapField.x === field.positionX && mapField.y === field.positionY;
       });
+      //console.log(treasureMap[mapFieldIndex], field);
       treasureMap[mapFieldIndex].value = field.value;
     });
   }
+  console.log(revealed_answers);
 
   return revealed_answers;
 };

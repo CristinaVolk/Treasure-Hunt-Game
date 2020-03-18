@@ -120,10 +120,8 @@ class Game extends React.Component {
     let i = 0;
     user_answers.forEach(item => {
       const objIndex = cells_values.findIndex(
-        cell => cell.y === item.x && cell.x === item.y
+        cell => cell.x === item.x && cell.y === item.y
       );
-
-      console.log(cells_values[objIndex]);
 
       if (user_cells_values[i].value.includes(`T`)) {
         cells_values[objIndex].color = `#ee6c75`;
@@ -159,12 +157,9 @@ class Game extends React.Component {
   };
 
   ifCellDisabled = pointOnMap => {
-    console.log(this.state.cells);
     const objIndex = this.state.cells.findIndex(
       obj => obj.x === pointOnMap.x && obj.y === pointOnMap.y
     );
-
-    console.log(this.state.cells[objIndex]);
 
     if (this.state.cells[objIndex].isEnabled === false) {
       this.count--;
@@ -179,7 +174,6 @@ class Game extends React.Component {
     const elemOffset = this.getElementOffset();
 
     const pointOnMap = this.obtainCoordinatesFromClick(event, elemOffset);
-    console.log(pointOnMap);
 
     if (this.ifCellDisabled(pointOnMap)) return;
 
@@ -218,8 +212,9 @@ class Game extends React.Component {
         this.user.countTreasure === MAX_TREASURES
       ) {
         this.user.results.push(this.user.score);
-        let user_scores = db.getUserScore(this.user.name);
-        user_scores.push(this.user.score);
+        console.log(this.user.results);
+        //let user_scores = db.getUserScore(this.user.name);
+        //user_scores.push(this.user.score);
 
         this.setState({ isRunning: false });
 
@@ -253,7 +248,6 @@ class Game extends React.Component {
   };
 
   runMove = movements => {
-    console.log(movements);
     axios
       .post(`http://localhost:3005/user/move`, {
         name: this.user.name,
@@ -336,9 +330,13 @@ class Game extends React.Component {
               {isGameFinished ? (
                 <div>
                   Your score
-                  {this.user.results.map((result, index = 0) => (
-                    <p key={index}>{result}</p>
-                  ))}
+                  {
+                    this.user
+                      .score /*this.user.results.map((result, index = 0) => {
+                    console.log(result, index);
+                    return <p key={index}>{result}</p>;
+                  })*/
+                  }
                 </div>
               ) : (
                 ""
