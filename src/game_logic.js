@@ -14,7 +14,6 @@ const generateTreasures = () => {
     treasures.push({ x, y });
     i++;
   }
-  console.log("Treasures : ", treasures);
   return treasures;
 };
 
@@ -41,7 +40,6 @@ const check_neighbours = (user_movements, TREASURES) => {
   ];
 
   user_movements.forEach(movement => {
-    console.log("movement ", movement);
     if (check_exists(movement.x, movement.y, TREASURES)) {
       cellValue = `T`;
     } else {

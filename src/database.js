@@ -41,7 +41,6 @@ const makeMove = (name, user_movements, treasureMap, TREASURES) => {
     user_movements,
     TREASURES
   );
-  console.log("rev", revealed_answers);
 
   if (currentUserIndex !== -1) {
     user_movements.forEach(movement => {
@@ -50,11 +49,9 @@ const makeMove = (name, user_movements, treasureMap, TREASURES) => {
 
     revealed_answers.forEach(field => {
       const mapFieldIndex = treasureMap.findIndex(mapField => {
-        //console.log(mapField, field);
         return mapField.x === field.positionX && mapField.y === field.positionY;
       });
       treasureMap[mapFieldIndex].value = field.value;
-      console.log(treasureMap[mapFieldIndex].value);
     });
   }
 
