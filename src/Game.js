@@ -2,8 +2,8 @@ import React from "react";
 import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
-import axios from "axios";
 
+const axios = require("axios");
 const db = require("./database");
 const gameLogic = require("./game_logic");
 
@@ -18,7 +18,8 @@ class Game extends React.Component {
     this.cols = WIDTH / CELL_SIZE;
     this.board = this.makeEmptyBoard();
     this.user = null;
-    this.treasureMap = [];
+    this.treasureMap = db.generateTreasureMap();
+    this.TREASURES = gameLogic.generateTreasures();
     this.count = 0;
 
     this.newUser = this.newUser.bind(this);
@@ -42,6 +43,28 @@ class Game extends React.Component {
     isUser: false
   };
 
+  handleSubmit = async () => {
+    if (this.state.name.length === 0) alert("You should provide your name");
+    else {
+      try {
+        let response = await axios.post("http://localhost:3005/user", {
+          name: this.state.name
+        });
+        let res_status = await response.status;
+
+        res_status === 201
+          ? this.setState({ isUser: true })
+          : this.setState({ isUser: false });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  newUser = newValue => {
+    this.setState({ name: newValue });
+  };
+
   makeEmptyBoard() {
     let board = [];
     for (let x = 0; x < this.rows; x++) {
@@ -54,13 +77,10 @@ class Game extends React.Component {
     return board;
   }
 
-  check_exists = (y, x, array_to_check) =>
-    array_to_check.some(item => item.x === x && item.y === y) ? true : false;
-
   makeTreasures = () => {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        if (gameLogic.TREASURES.find(item => item.x === x && item.y === y))
+        if (this.TREASURES.find(item => item.x === x && item.y === y))
           this.board[x][y] = true;
 
         this.board[x][y] = false;
@@ -78,14 +98,20 @@ class Game extends React.Component {
     };
   };
 
-  makeCells = () => {
+  makeCells = isEnabled => {
     this.user.countTreasure = 0;
     let cells = [];
     let color = `#554562`;
 
     for (let x = 0; x < this.rows; x++) {
       for (let y = 0; y < this.cols; y++) {
-        [...cells, { x: x, y: y, color: color, value: "", isEnabled: true }];
+        cells.push({
+          x: x,
+          y: y,
+          color: color,
+          value: "",
+          isEnabled: isEnabled
+        });
       }
     }
 
@@ -94,16 +120,14 @@ class Game extends React.Component {
 
   changeCells = user_cells_values => {
     let cells_values = this.state.cells;
-    console.log(user_cells_values);
-    console.log(cells_values);
+
     let user_answers = this.user.selected_answers;
 
     let i = 0;
     user_answers.forEach(item => {
       const objIndex = cells_values.findIndex(
-        cell => cell.y === item.x && cell.x === item.y
+        cell => cell.x === item.x && cell.y === item.y
       );
-      console.log(objIndex, cells_values[objIndex]);
 
       if (user_cells_values[i].value.includes(`T`)) {
         cells_values[objIndex].color = `#ee6c75`;
@@ -128,61 +152,81 @@ class Game extends React.Component {
     return cells_values;
   };
 
-  handleClick = event => {
-    this.count++;
-
-    console.log(this.count);
-    const elemOffset = this.getElementOffset();
-
+  obtainCoordinatesFromClick = (event, elemOffset) => {
     const offsetX = event.clientX - elemOffset.x;
     const offsetY = event.clientY - elemOffset.y;
 
     const x = Math.floor(offsetX / CELL_SIZE);
     const y = Math.floor(offsetY / CELL_SIZE);
+    let pointOnMap = { x: x, y: y };
+    return pointOnMap;
+  };
 
+  ifCellDisabled = pointOnMap => {
     const objIndex = this.state.cells.findIndex(
-      obj => obj.y === y && obj.x === x
+      obj => obj.x === pointOnMap.x && obj.y === pointOnMap.y
     );
 
     if (this.state.cells[objIndex].isEnabled === false) {
       this.count--;
-      return;
+      return true;
     }
-    if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
-      this.user.selected_answers.push({ x, y });
+    return false;
+  };
+
+  update_cells = () => {
+    let answers_to_show = gameLogic.check_neighbours(
+      this.user.selected_answers,
+      this.TREASURES
+    );
+
+    answers_to_show.array.forEach(answer => {
+      if (answer.value === `T`) this.user.countTreasure++;
+    });
+
+    const updated_cells = this.changeCells(answers_to_show, this.user.score);
+
+    this.setState({
+      cells: updated_cells
+    });
+  };
+
+  updateScores = () => {
+    axios
+      .put(`localhost:3005/user/score`, {
+        name: this.user.name,
+        score: this.user.score
+      })
+      .then(response => console.log(response, "Score added!"));
+  };
+
+  handleClick = event => {
+    const elemOffset = this.getElementOffset();
+    const pointOnMap = this.obtainCoordinatesFromClick(event, elemOffset);
+
+    if (this.ifCellDisabled(pointOnMap)) return;
+
+    if (
+      pointOnMap.x >= 0 &&
+      pointOnMap.x <= this.cols &&
+      pointOnMap.y >= 0 &&
+      pointOnMap.y <= this.rows
+    ) {
+      this.user.selected_answers.push(pointOnMap);
     }
 
     if (this.count === MAX_CLICKS) {
       this.user.score++;
-
       this.runMove(this.user.selected_answers);
-
-      this.setState({ isUser: true });
-
-      let answers_to_show = gameLogic.check_neighbours(
-        this.user.selected_answers
-      );
-
-      const updated_cells = this.changeCells(answers_to_show, this.user.score);
-
-      this.setState({
-        cells: updated_cells
-      });
+      this.update_cells();
 
       if (
         this.user.score === MAX_MOVE ||
         this.user.countTreasure === MAX_TREASURES
       ) {
-        this.user.results.push(this.user.score);
-        let user_scores = db.getUserScore(this.user.name);
-        user_scores.push(this.user.score);
-
-        this.setState({
-          cells: this.state.cells.map(cell => (cell.isEnabled = false))
-        });
-        this.setState({ isRunning: false });
+        this.updateScore();
+        this.end_call();
       }
-
       this.endMove();
     }
   };
@@ -193,32 +237,28 @@ class Game extends React.Component {
       board: this.board,
       selected_answers: [],
       countTreasure: 0,
-      results: [],
       score: 0
     };
-
+    this.setState({ isUser: true });
     this.setState({ isGameStart: true });
   };
 
   runCall = () => {
-    this.treasureMap = db.generateTreasureMap();
-    gameLogic.TREASURES = gameLogic.generateTreasures();
+    this.board = this.makeEmptyBoard();
+    this.TREASURES = gameLogic.generateTreasures();
     this.setState({ isRunning: true });
-    this.setState({ cells: this.makeCells() });
-
-    this.count = 0;
+    this.setState({ cells: this.makeCells(true) });
     this.user.countTreasure = 0;
     this.user.score = 0;
-    this.user.results = db.getUserScore(this.user.name);
   };
 
   runMove = movements => {
-    db.treasureMap = this.treasureMap;
-    console.log(db.treasureMap, movements);
     axios
       .post(`http://localhost:3005/user/move`, {
         name: this.user.name,
-        movements: movements
+        movements: movements,
+        treasureMap: this.treasureMap,
+        TREASURES: this.TREASURES
       })
       .then(response => console.log(response, "Movements added!"));
   };
@@ -228,30 +268,15 @@ class Game extends React.Component {
     this.user.selected_answers = [];
   };
 
-  handleSubmit = () => {
-    if (this.state.name.length === 0) alert("You should provide your name");
-    else {
-      axios
-        .post("http://localhost:3005/user", {
-          name: this.state.name
-        })
-        .then(response => {
-          console.log(response, "User added!");
-        });
-      this.setState({ isUser: true });
-    }
-  };
-  newUser = newValue => {
-    this.setState({ name: newValue });
+  end_call = () => {
+    this.setState({ isRunning: false });
+    this.setState({ cells: this.makeCells(false) });
+    this.TREASURES = [];
   };
 
   stopGame = () => {
     this.setState({ isRunning: false });
-  };
-  clear_board = () => {
-    this.board = this.makeEmptyBoard();
-    this.setState({ cells: this.makeCells() });
-    this.treasureMap = null;
+    this.setState({ isGameStart: false });
   };
 
   displayResult = () => {
@@ -313,9 +338,9 @@ class Game extends React.Component {
               {isGameFinished ? (
                 <div>
                   Your score
-                  {this.displayResult.map((result, index) => (
-                    <p key={index}>{result}</p>
-                  ))}
+                  {this.displayResult.map((result, index) => {
+                    return <p key={index}>{result}</p>;
+                  })}
                 </div>
               ) : (
                 ""
