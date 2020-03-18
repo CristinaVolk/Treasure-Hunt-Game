@@ -19,7 +19,7 @@
 ```
 example content in a body:
 {
-      "name":"Janett"
+      "name":"Katarzyna"
 }
 ```
 
@@ -35,7 +35,7 @@ example content in a body:
 example content in a body:
 
 {
-    "name": "kris",
+    "name": "Katarzyna",
     "movements": [
     	{"x":4,"y":1},
     	{"x":2,"y":2},
@@ -89,7 +89,7 @@ example content in a body:
 ```
 example url with the defined name:
 
-      localhost:3005/user/Janett
+      localhost:3005/user/Katarzyna
 
 ```
 
@@ -99,16 +99,20 @@ example url with the defined name:
 []
 ```
 
-### Get User
+### Update User's scores
 
-- type: Get
+- type: Put
 
-- url: localhost:3005/user/:name
+- url: localhost:3005/user/score
 
 ```
-example url with the defined name:
+example content in a body:
 
-      localhost:3005/user/Janett
+{
+    {
+	"name":"Katarzyna",
+	"score":"4"
+}
 
 ```
 
@@ -116,8 +120,10 @@ example url with the defined name:
 
 ```
 {
-    "name": "Janett",
-    "scores": [],
+    "name": "Katarzyna",
+    "scores": [
+        "4"
+    ],
     "movements": []
 }
 ```
