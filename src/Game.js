@@ -98,14 +98,20 @@ class Game extends React.Component {
     };
   };
 
-  makeCells = () => {
+  makeCells = isEnabled => {
     this.user.countTreasure = 0;
     let cells = [];
     let color = `#554562`;
 
     for (let x = 0; x < this.rows; x++) {
       for (let y = 0; y < this.cols; y++) {
-        cells.push({ x: x, y: y, color: color, value: "", isEnabled: true });
+        cells.push({
+          x: x,
+          y: y,
+          color: color,
+          value: "",
+          isEnabled: isEnabled
+        });
       }
     }
 
@@ -168,8 +174,36 @@ class Game extends React.Component {
     return false;
   };
 
+  update_cells = () => {
+    let answers_to_show = gameLogic.check_neighbours(
+      this.user.selected_answers,
+      this.TREASURES
+    );
+
+    answers_to_show.map(answer => {
+      if (answer.value === `T`) this.user.countTreasure++;
+      console.log("countTreasure:", this.user.countTreasure);
+    });
+
+    const updated_cells = this.changeCells(answers_to_show, this.user.score);
+
+    this.setState({
+      cells: updated_cells
+    });
+  };
+
+  updateScores = () => {
+    axios
+      .put(`localhost:3005/user/score`, {
+        name: this.user.name,
+        score: this.user.score
+      })
+      .then(response => console.log(response, "Score added!"));
+  };
+
   handleClick = event => {
     console.log("count", this.count++);
+    console.log("countTreasure", this.countTreasure++);
 
     const elemOffset = this.getElementOffset();
 
@@ -188,41 +222,21 @@ class Game extends React.Component {
 
     if (this.count === MAX_CLICKS) {
       this.user.score++;
-
       this.runMove(this.user.selected_answers);
 
-      let answers_to_show = gameLogic.check_neighbours(
-        this.user.selected_answers,
-        this.TREASURES
-      );
-
-      answers_to_show.map(answer => {
-        if (answer.value === `T`) this.user.countTreasure++;
-        console.log("countTreasure:", this.user.countTreasure);
-      });
-
-      const updated_cells = this.changeCells(answers_to_show, this.user.score);
-
-      this.setState({
-        cells: updated_cells
-      });
+      this.update_cells();
 
       if (
         this.user.score === MAX_MOVE ||
         this.user.countTreasure === MAX_TREASURES
       ) {
-        this.user.results.push(this.user.score);
-        console.log(this.user.results);
-        //let user_scores = db.getUserScore(this.user.name);
-        //user_scores.push(this.user.score);
+        this.updateScore();
 
-        this.setState({ isRunning: false });
+        let user_scores = db.getUserScore(this.user.name);
+        this.user.results = user_scores;
 
-        this.setState({
-          cells: this.state.cells.map(cell => (cell.isEnabled = false))
-        });
+        this.end_call();
       }
-
       this.endMove();
     }
   };
@@ -241,8 +255,10 @@ class Game extends React.Component {
   };
 
   runCall = () => {
+    this.board = this.makeEmptyBoard();
+    this.TREASURES = gameLogic.generateTreasures();
     this.setState({ isRunning: true });
-    this.setState({ cells: this.makeCells() });
+    this.setState({ cells: this.makeCells(true) });
     this.user.countTreasure = 0;
     this.user.score = 0;
   };
@@ -263,12 +279,15 @@ class Game extends React.Component {
     this.user.selected_answers = [];
   };
 
+  end_call = () => {
+    this.setState({ isRunning: false });
+    this.setState({ cells: this.makeCells(false) });
+    this.TREASURES = [];
+  };
+
   stopGame = () => {
     this.setState({ isRunning: false });
-  };
-  clear_board = () => {
-    this.board = this.makeEmptyBoard();
-    this.setState({ cells: this.makeCells() });
+    this.setState({ isGameStart: false });
   };
 
   displayResult = () => {
@@ -330,13 +349,9 @@ class Game extends React.Component {
               {isGameFinished ? (
                 <div>
                   Your score
-                  {
-                    this.user
-                      .score /*this.user.results.map((result, index = 0) => {
-                    console.log(result, index);
+                  {this.user.results.map((result, index) => {
                     return <p key={index}>{result}</p>;
-                  })*/
-                  }
+                  })}
                 </div>
               ) : (
                 ""

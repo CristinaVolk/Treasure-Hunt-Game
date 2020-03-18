@@ -14,23 +14,23 @@ var corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.get("/scores/top/:name", cors(corsOptions), async (req, res, body) => {
-  const { name } = req.params;
-  results = await db.getBestScores(name);
-
-  res.json(results);
-});
-
-app.get("/user/:name", (req, res) => {
+app.put("/user/score", (req, res) => {
   try {
-    const { name } = req.params;
+    const { name, score } = req.body;
     const user = db.findUserByName(name);
-    console.log(user);
+    if (user) user.scores.push(score);
     res.send(user);
   } catch (error) {
     console.error(error);
     res.send(error);
   }
+});
+
+app.get("/scores/top/:name", cors(corsOptions), async (req, res, body) => {
+  const { name } = req.params;
+  results = await db.getBestScores(name);
+
+  res.json(results);
 });
 
 app.post("/user", (req, res) => {
