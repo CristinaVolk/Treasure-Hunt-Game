@@ -6,6 +6,7 @@ import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 const axios = require("axios");
 const db = require("./database");
 const gameLogic = require("./game_logic");
+const core = require("./core");
 
 const MAX_MOVE = 8;
 const MAX_TREASURES = 3;
@@ -16,7 +17,7 @@ class Game extends React.Component {
     super();
     this.rows = HEIGHT / CELL_SIZE;
     this.cols = WIDTH / CELL_SIZE;
-    this.board = this.makeEmptyBoard();
+    this.board = core.makeEmptyBoard();
     this.user = null;
     this.treasureMap = db.generateTreasureMap();
     this.TREASURES = gameLogic.generateTreasures();
@@ -65,18 +66,6 @@ class Game extends React.Component {
     this.setState({ name: newValue });
   };
 
-  makeEmptyBoard() {
-    let board = [];
-    for (let x = 0; x < this.rows; x++) {
-      board[x] = [];
-      for (let y = 0; y < this.cols; y++) {
-        board[x][y] = false;
-      }
-    }
-
-    return board;
-  }
-
   makeTreasures = () => {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
@@ -86,16 +75,6 @@ class Game extends React.Component {
         this.board[x][y] = false;
       }
     }
-  };
-
-  getElementOffset = () => {
-    const rect = this.boardRef.getBoundingClientRect();
-    const doc = document.documentElement;
-
-    return {
-      x: rect.left + window.pageXOffset - doc.clientLeft,
-      y: rect.top + window.pageYOffset - doc.clientTop
-    };
   };
 
   makeCells = isEnabled => {
@@ -152,16 +131,6 @@ class Game extends React.Component {
     return cells_values;
   };
 
-  obtainCoordinatesFromClick = (event, elemOffset) => {
-    const offsetX = event.clientX - elemOffset.x;
-    const offsetY = event.clientY - elemOffset.y;
-
-    const x = Math.floor(offsetX / CELL_SIZE);
-    const y = Math.floor(offsetY / CELL_SIZE);
-    let pointOnMap = { x: x, y: y };
-    return pointOnMap;
-  };
-
   ifCellDisabled = pointOnMap => {
     const objIndex = this.state.cells.findIndex(
       obj => obj.x === pointOnMap.x && obj.y === pointOnMap.y
@@ -202,9 +171,8 @@ class Game extends React.Component {
 
   handleClick = event => {
     this.count++;
-    const elemOffset = this.getElementOffset();
-
-    const pointOnMap = this.obtainCoordinatesFromClick(event, elemOffset);
+    const elemOffset = core.getElementOffset(this.boardRef);
+    const pointOnMap = core.obtainCoordinatesFromClick(event, elemOffset);
 
     if (this.ifCellDisabled(pointOnMap)) return;
 
@@ -246,7 +214,7 @@ class Game extends React.Component {
   };
 
   runCall = () => {
-    this.board = this.makeEmptyBoard();
+    this.board = core.makeEmptyBoard();
     this.TREASURES = gameLogic.generateTreasures();
     this.setState({ isRunning: true });
     this.setState({ cells: this.makeCells(true) });

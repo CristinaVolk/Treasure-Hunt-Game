@@ -14,19 +14,7 @@ var corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.put("/user/score", (req, res) => {
-  try {
-    const { name, score } = req.body;
-    const user = db.findUserByName(name);
-    if (user) user.scores.push(score);
-    res.send(user);
-  } catch (error) {
-    console.error(error);
-    res.send(error);
-  }
-});
-
-app.get("/scores/top/:name", cors(corsOptions), async (req, res, body) => {
+app.get("/scores/top/:name", cors(corsOptions), async (req, res) => {
   const { name } = req.params;
   results = await db.getBestScores(name);
 
@@ -51,6 +39,18 @@ app.post("/user/move", (req, res) => {
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
+  }
+});
+
+app.put("/user/score", (req, res) => {
+  try {
+    const { name, score } = req.body;
+    const user = db.findUserByName(name);
+    if (user) user.scores.push(score);
+    res.send(user);
+  } catch (error) {
+    console.error(error);
+    res.send(error);
   }
 });
 
