@@ -180,7 +180,7 @@ class Game extends React.Component {
       this.TREASURES
     );
 
-    answers_to_show.array.forEach(answer => {
+    answers_to_show.forEach(answer => {
       if (answer.value === `T`) this.user.countTreasure++;
     });
 
@@ -201,7 +201,9 @@ class Game extends React.Component {
   };
 
   handleClick = event => {
+    this.count++;
     const elemOffset = this.getElementOffset();
+
     const pointOnMap = this.obtainCoordinatesFromClick(event, elemOffset);
 
     if (this.ifCellDisabled(pointOnMap)) return;
@@ -224,7 +226,7 @@ class Game extends React.Component {
         this.user.score === MAX_MOVE ||
         this.user.countTreasure === MAX_TREASURES
       ) {
-        this.updateScore();
+        this.updateScores();
         this.end_call();
       }
       this.endMove();
