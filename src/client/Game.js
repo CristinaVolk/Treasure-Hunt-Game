@@ -4,8 +4,8 @@ import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 
 const axios = require("axios");
-const db = require("./database");
-const gameLogic = require("./game_logic");
+const db = require("../server/database");
+const gameLogic = require("../server/game_logic");
 const core = require("./core");
 
 const MAX_MOVE = 8;
@@ -162,7 +162,7 @@ class Game extends React.Component {
 
   updateScores = () => {
     axios
-      .put(`localhost:3005/user/score`, {
+      .put(`http://localhost:3005/user/score`, {
         name: this.user.name,
         score: this.user.score
       })

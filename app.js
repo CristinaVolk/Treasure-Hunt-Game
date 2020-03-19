@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-var async = require("async");
+//const async = require("async");
 const PORT = 3005;
 
-const db = require("./src/database");
+const db = require("./src/server/database");
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -15,10 +15,13 @@ var corsOptions = {
 };
 
 app.get("/scores/top/:name", cors(corsOptions), async (req, res) => {
-  const { name } = req.params;
-  results = await db.getBestScores(name);
-
-  res.json(results);
+  try {
+    const { name } = req.params;
+    results = await db.getBestScores(name);
+    res.json(results);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.post("/user", (req, res) => {
@@ -42,10 +45,10 @@ app.post("/user/move", (req, res) => {
   }
 });
 
-app.put("/user/score", (req, res) => {
+app.put("/user/score", async (req, res) => {
   try {
     const { name, score } = req.body;
-    const user = db.findUserByName(name);
+    const user = await db.findUserByName(name);
     if (user) user.scores.push(score);
     res.send(user);
   } catch (error) {
