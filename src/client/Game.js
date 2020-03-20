@@ -190,12 +190,15 @@ class Game extends React.Component {
       this.runMove(this.user.selected_answers);
       this.update_cells();
 
-      if (
-        this.user.score === MAX_MOVE ||
-        this.user.countTreasure === MAX_TREASURES
-      ) {
+      if (this.user.score === MAX_MOVE) {
         this.updateScores();
-        this.end_call();
+        this.setState({ cells: this.makeCells(false) });
+      }
+      if (this.user.countTreasure === MAX_TREASURES) {
+        this.updateScores();
+        this.setState({ isRunning: false });
+        this.displayResult();
+        this.TREASURES = [];
       }
       this.endMove();
     }
@@ -238,12 +241,6 @@ class Game extends React.Component {
     this.user.selected_answers = [];
   };
 
-  end_call = () => {
-    this.setState({ isRunning: false });
-    this.setState({ cells: this.makeCells(false) });
-    this.TREASURES = [];
-  };
-
   stopGame = () => {
     this.setState({ isRunning: false });
     this.setState({ isGameStart: false });
@@ -251,7 +248,7 @@ class Game extends React.Component {
 
   displayResult = () => {
     const results = axios
-      .get(`localhost:3005/top/score`)
+      .get(`http://localhost:3005/top/score`)
       .then(response => response.json())
       .then(topResults => this.setState(topResults));
     return results;
