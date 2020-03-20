@@ -34,12 +34,12 @@ const addUser = name => users.push({ name, scores: [], movements: [] });
 
 const findUserByName = name => users.find(user => user.name === name);
 
-const makeMove = (name, user_movements, treasureMap, TREASURES) => {
+const makeMove = (name, user_movements, treasureMap, treasures) => {
   const currentUserIndex = users.findIndex(user => user.name === name);
 
-  const revealed_answers = game_logic.check_neighbours(
+  const movementsAsignedValues = game_logic.check_neighbours(
     user_movements,
-    TREASURES
+    treasures
   );
 
   if (currentUserIndex !== -1) {
@@ -47,7 +47,7 @@ const makeMove = (name, user_movements, treasureMap, TREASURES) => {
       users[currentUserIndex].movements.push(movement);
     });
 
-    revealed_answers.forEach(field => {
+    movementsAsignedValues.forEach(field => {
       const mapFieldIndex = treasureMap.findIndex(mapField => {
         return mapField.x === field.positionX && mapField.y === field.positionY;
       });
@@ -55,7 +55,7 @@ const makeMove = (name, user_movements, treasureMap, TREASURES) => {
     });
   }
 
-  return revealed_answers;
+  return movementsAsignedValues;
 };
 
 module.exports = {

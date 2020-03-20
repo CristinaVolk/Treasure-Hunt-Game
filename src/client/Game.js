@@ -8,7 +8,7 @@ const db = require("../server/database");
 const gameLogic = require("../server/game_logic");
 const core = require("./core");
 
-const MAX_MOVE = 8;
+const MAX_MOVES = 8;
 const MAX_TREASURES = 3;
 const MAX_CLICKS = 3;
 
@@ -20,17 +20,14 @@ class Game extends React.Component {
     this.board = core.makeEmptyBoard();
     this.user = null;
     this.treasureMap = db.generateTreasureMap();
-    this.TREASURES = gameLogic.generateTreasures();
-    this.count = 0;
+    this.treasures = gameLogic.generateTreasures();
 
     this.newUser = this.newUser.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
     this.runMove = this.runMove.bind(this);
-    this.runCall = this.runCall.bind(this);
-    this.endMove = this.endMove.bind(this);
-    this.stopGame = this.stopGame.bind(this);
+    this.runSet = this.runSet.bind(this);
   }
 
   state = {
@@ -69,9 +66,12 @@ class Game extends React.Component {
   makeTreasures = () => {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
-        if (this.TREASURES.find(item => item.x === x && item.y === y))
+        if (
+          this.treasures.find(
+            treasureItem => treasureItem.x === x && treasureItem.y === y
+          )
+        )
           this.board[x][y] = true;
-
         this.board[x][y] = false;
       }
     }
@@ -99,8 +99,7 @@ class Game extends React.Component {
 
   changeCells = user_cells_values => {
     let cells_values = this.state.cells;
-
-    let user_answers = this.user.selected_answers;
+    let user_answers = this.user.movements;
 
     let i = 0;
     user_answers.forEach(item => {
@@ -131,32 +130,42 @@ class Game extends React.Component {
     return cells_values;
   };
 
-  ifCellDisabled = pointOnMap => {
+  checkIfCellWasClicked = pointOnMap => {
     const objIndex = this.state.cells.findIndex(
       obj => obj.x === pointOnMap.x && obj.y === pointOnMap.y
     );
 
     if (this.state.cells[objIndex].isEnabled === false) {
-      this.count--;
+      this.user.countClicks--;
       return true;
     }
     return false;
   };
 
-  update_cells = () => {
-    let answers_to_show = gameLogic.check_neighbours(
-      this.user.selected_answers,
-      this.TREASURES
+  updateCells = () => {
+    let selectedCellsAssighed = gameLogic.check_neighbours(
+      this.user.movements,
+      this.treasures
     );
 
-    answers_to_show.forEach(answer => {
+    selectedCellsAssighed.forEach(answer => {
       if (answer.value === `T`) this.user.countTreasure++;
     });
 
-    const updated_cells = this.changeCells(answers_to_show, this.user.score);
+    if (this.user.countTreasure >= MAX_TREASURES) {
+      this.updateScores();
+      this.setState({ isRunning: false });
+      this.displayResult();
+      this.treasures = [];
+    }
+
+    const updatedCells = this.changeCells(
+      selectedCellsAssighed,
+      this.user.score
+    );
 
     this.setState({
-      cells: updated_cells
+      cells: updatedCells
     });
   };
 
@@ -170,11 +179,11 @@ class Game extends React.Component {
   };
 
   handleClick = event => {
-    this.count++;
+    this.user.countClicks++;
     const elemOffset = core.getElementOffset(this.boardRef);
     const pointOnMap = core.obtainCoordinatesFromClick(event, elemOffset);
 
-    if (this.ifCellDisabled(pointOnMap)) return;
+    if (this.checkIfCellWasClicked(pointOnMap)) return;
 
     if (
       pointOnMap.x >= 0 &&
@@ -182,24 +191,20 @@ class Game extends React.Component {
       pointOnMap.y >= 0 &&
       pointOnMap.y <= this.rows
     ) {
-      this.user.selected_answers.push(pointOnMap);
+      this.user.movements.push(pointOnMap);
     }
 
-    if (this.count === MAX_CLICKS) {
+    if (this.user.countClicks === MAX_CLICKS) {
       this.user.score++;
-      this.runMove(this.user.selected_answers);
-      this.update_cells();
+      this.runMove(this.user.movements);
+      this.updateCells();
 
-      if (this.user.score === MAX_MOVE) {
+      if (this.user.score === MAX_MOVES) {
         this.updateScores();
         this.setState({ cells: this.makeCells(false) });
-      }
-      if (this.user.countTreasure === MAX_TREASURES) {
-        this.updateScores();
         this.setState({ isRunning: false });
-        this.displayResult();
-        this.TREASURES = [];
       }
+
       this.endMove();
     }
   };
@@ -208,21 +213,24 @@ class Game extends React.Component {
     this.user = {
       name: this.state.name,
       board: this.board,
-      selected_answers: [],
+      movements: [],
       countTreasure: 0,
-      score: 0
+      score: 0,
+      countSets: 0,
+      countClicks: 0
     };
     this.setState({ isUser: true });
     this.setState({ isGameStart: true });
   };
 
-  runCall = () => {
+  runSet = () => {
     this.board = core.makeEmptyBoard();
-    this.TREASURES = gameLogic.generateTreasures();
-    this.setState({ isRunning: true });
-    this.setState({ cells: this.makeCells(true) });
+    this.treasures = gameLogic.generateTreasures();
     this.user.countTreasure = 0;
     this.user.score = 0;
+    this.user.countSets++;
+    this.setState({ isRunning: true });
+    this.setState({ cells: this.makeCells(true) });
   };
 
   runMove = movements => {
@@ -231,14 +239,15 @@ class Game extends React.Component {
         name: this.user.name,
         movements: movements,
         treasureMap: this.treasureMap,
-        TREASURES: this.TREASURES
+        treasures: this.treasures
       })
       .then(response => console.log(response, "Movements added!"));
   };
 
   endMove = () => {
-    this.count = 0;
-    this.user.selected_answers = [];
+    this.user.countClicks = 0;
+    this.user.movements = [];
+    if (this.user.countSets === 10) this.setState({ isGameFinished: true });
   };
 
   stopGame = () => {
@@ -248,8 +257,7 @@ class Game extends React.Component {
 
   displayResult = () => {
     const results = axios
-      .get(`http://localhost:3005/top/score`)
-      .then(response => response.json())
+      .get(`http://localhost:3005/scores/top/${this.user.name}`)
       .then(topResults => this.setState(topResults));
     return results;
   };
@@ -326,7 +334,7 @@ class Game extends React.Component {
               {!isRunning && isGameStart ? (
                 <button
                   className="button"
-                  onClick={this.runCall}
+                  onClick={this.runSet}
                   style={{ fontSize: `24px` }}
                 >
                   <p>Press the button to run the Set</p>

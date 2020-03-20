@@ -1,23 +1,23 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-//const async = require("async");
+var express = require("express");
+var cors = require("cors");
+var { json } = require("body-parser");
 const PORT = 3005;
 
-const db = require("./src/server/database");
+var {
+  getBestScores,
+  addUser,
+  makeMove,
+  findUserByName
+} = require("./database");
+
 const app = express();
-app.use(bodyParser.json());
+app.use(json());
 app.use(cors());
 
-var corsOptions = {
-  origin: "http://localhost:3000",
-  optionsSuccessStatus: 200
-};
-
-app.get("/scores/top/:name", cors(corsOptions), async (req, res) => {
+app.get("/scores/top/:name", async (req, res) => {
   try {
     const { name } = req.params;
-    results = await db.getBestScores(name);
+    results = await getBestScores(name);
     res.json(results);
   } catch (error) {
     console.error(error);
@@ -26,7 +26,7 @@ app.get("/scores/top/:name", cors(corsOptions), async (req, res) => {
 
 app.post("/user", (req, res) => {
   try {
-    const user = db.addUser(req.body.name);
+    const user = addUser(req.body.name);
     if (user) res.sendStatus(201);
   } catch (error) {
     console.error(error);
@@ -36,8 +36,8 @@ app.post("/user", (req, res) => {
 
 app.post("/user/move", (req, res) => {
   try {
-    const { name, movements, treasureMap, TREASURES } = req.body;
-    const result = db.makeMove(name, movements, treasureMap, TREASURES);
+    const { name, movements, treasureMap, treasures } = req.body;
+    const result = makeMove(name, movements, treasureMap, treasures);
     res.json(result);
   } catch (error) {
     console.error(error);
@@ -48,7 +48,7 @@ app.post("/user/move", (req, res) => {
 app.put("/user/score", async (req, res) => {
   try {
     const { name, score } = req.body;
-    const user = await db.findUserByName(name);
+    const user = await findUserByName(name);
     if (user) user.scores.push(score);
     res.send(user);
   } catch (error) {

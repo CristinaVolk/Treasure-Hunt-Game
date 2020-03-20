@@ -20,9 +20,9 @@ const check_exists = (x, y, map_array) => {
   return map_array.find(item => item.x === x && item.y === y);
 };
 
-const check_neighbours = (user_movements, TREASURES) => {
+const check_neighbours = (movements, treasures) => {
   let cellValue = `1`;
-  let revealedAnswers = [];
+  let movementsAsignedValues = [];
 
   let diagonal_neighbors = [
     { y_n: -1, x_n: -1 },
@@ -38,15 +38,15 @@ const check_neighbours = (user_movements, TREASURES) => {
     { y_n: 0, x_n: -1 }
   ];
 
-  user_movements.forEach(movement => {
-    if (check_exists(movement.x, movement.y, TREASURES)) {
+  movements.forEach(movement => {
+    if (check_exists(movement.x, movement.y, treasures)) {
       cellValue = `T`;
     } else {
       for (let i = 0; i < diagonal_neighbors.length; i++) {
         let x1 = movement.x + diagonal_neighbors[i].x_n;
         let y1 = movement.y + diagonal_neighbors[i].y_n;
 
-        if (check_exists(x1, y1, TREASURES)) {
+        if (check_exists(x1, y1, treasures)) {
           cellValue = `2`;
           break;
         }
@@ -54,20 +54,20 @@ const check_neighbours = (user_movements, TREASURES) => {
       for (let i = 0; i < side_neighbors.length; i++) {
         let x1 = movement.x + side_neighbors[i].x_n;
         let y1 = movement.y + side_neighbors[i].y_n;
-        if (check_exists(x1, y1, TREASURES)) {
+        if (check_exists(x1, y1, treasures)) {
           cellValue = `3`;
           break;
         }
       }
     }
 
-    revealedAnswers.push({
+    movementsAsignedValues.push({
       positionX: movement.x,
       positionY: movement.y,
       value: cellValue
     });
   });
-  return revealedAnswers;
+  return movementsAsignedValues;
 };
 
 module.exports = {
