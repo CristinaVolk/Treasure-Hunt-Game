@@ -2,7 +2,7 @@
 
 ## How to run the poject:
 
-```pull the project from the branch logic-implementation ```
+`pull the project from the branch logic-implementation`
 
 1. Run the command : `npm install` in the terminal.
 2. Run the command : `npm run server:watch` in the terminal in order to start the server on the localhost:3005
@@ -23,7 +23,7 @@ example content in a body:
 }
 ```
 
-- valid response: object with the newly created user with the scores empty array and movements properties
+- valid response: Created
 
 ### Make a move
 
@@ -36,24 +36,45 @@ example content in a body:
 
 {
     "name": "Katarzyna",
-    "movements": [
-    	{"x":4,"y":1},
-    	{"x":2,"y":2},
-    	{"x":0,"y":1}],
 
-   "treasureMap":[
-        {"x":0, "y": 0, "value": "" },
-        {"x":0, "y": 1, "value": "" },
-        {"x":0, "y": 2, "value": ""  },
-        {"x":0,"y": 3, "value": ""  },
-        {"x":0, "y": 4, "value": "" },
-        {"x":1, "y": 0, "value": "" },
-        {"x":1, "y": 4, "value": ""  },
-        {"x":2 ,"y": 0, "value": ""  },
-        {"x":2, "y": 1, "value": ""  },
-        {"x":2, "y": 2," value": ""  },
-        {"x":2, "y": 2, "value":""  },
-        {"x":4, "y": 2, "value": ""  }
+    "movements": [
+        { "positionX": 1, "positionY": 4, "value": 1 },
+        { "positionX": 1, "positionY": 3, "value": 1 },
+        { "positionX": 1, "positionY": 2, "value": 1 }
+    ],
+
+ "treasureMap": [
+        { "positionX": 0, "positionY": 0, "value": "" },
+        { "positionX": 0, "positionY": 1, "value": "" },
+        { "positionX": 0, "positionY": 2, "value": "" },
+        { "positionX": 0, "positionY": 3, "value": "" },
+        { "positionX": 0, "positionY": 4, "value": "" },
+        { "positionX": 1, "positionY": 0, "value": "" },
+        { "positionX": 1, "positionY": 1, "value": "" },
+        { "positionX": 1, "positionY": 2, "value": "" },
+        { "positionX": 1, "positionY": 3, "value": "" },
+        { "positionX": 1, "positionY": 4, "value": "" },
+        { "positionX": 2, "positionY": 0, "value": "" },
+        { "positionX": 2, "positionY": 1, "value": "" },
+        { "positionX": 2, "positionY": 2, "value": "" },
+        { "positionX": 2, "positionY": 3, "value": "" },
+        { "positionX": 2, "positionY": 4, "value": "" },
+        { "positionX": 3, "positionY": 0, "value": "" },
+        { "positionX": 3, "positionY": 1, "value": "" },
+        { "positionX": 3, "positionY": 2, "value": "" },
+        { "positionX": 3, "positionY": 3, "value": "" },
+        { "positionX": 3, "positionY": 4, "value": "" },
+        { "positionX": 4, "positionY": 0, "value": "" },
+        { "positionX": 4, "positionY": 1, "value": "" },
+        { "positionX": 4, "positionY": 2, "value": "" },
+        { "positionX": 4, "positionY": 3, "value": "" },
+        { "positionX": 4, "positionY": 4, "value": "" }
+    ],
+
+  "treasures": [
+        { "positionX": 4, "positionY": 0 },
+        { "positionX": 4, "positionY": 3 },
+        { "positionX": 4, "positionY": 2 }
     ]
 }
 
@@ -63,18 +84,18 @@ example content in a body:
 * valid response:
 [
     {
-        "positionY": 1,
-        "positionX": 4,
+        "positionX": 1,
+        "positionY": 4,
         "value": "1"
     },
     {
+        "positionX": 1,
+        "positionY": 3,
+        "value": "1"
+    },
+    {
+        "positionX": 1,
         "positionY": 2,
-        "positionX": 2,
-        "value": "1"
-    },
-    {
-        "positionY": 1,
-        "positionX": 0,
         "value": "1"
     }
 ]
@@ -84,19 +105,21 @@ example content in a body:
 
 - type: Get
 
-- url: localhost:3005/score/top/:name
+- url: localhost:3005/scores/top/:name
 
 ```
 example url with the defined name:
 
-      localhost:3005/user/Katarzyna
+      http://localhost:3005/scores/top/Katarzyna
 
 ```
 
 - valid response: array of the sorted values in the scores array property
 
 ```
-[]
+[
+    "4"
+]
 ```
 
 ### Update User's scores
@@ -109,7 +132,7 @@ example url with the defined name:
 example content in a body:
 
 {
-    {
+
 	"name":"Katarzyna",
 	"score":"4"
 }
@@ -124,6 +147,22 @@ example content in a body:
     "scores": [
         "4"
     ],
-    "movements": []
+    "movements": [
+        {
+            "positionX": 1,
+            "positionY": 4,
+            "value": "1"
+        },
+        {
+            "positionX": 1,
+            "positionY": 3,
+            "value": "1"
+        },
+        {
+            "positionX": 1,
+            "positionY": 2,
+            "value": "1"
+        }
+    ]
 }
 ```

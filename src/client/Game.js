@@ -64,15 +64,17 @@ class Game extends React.Component {
   };
 
   makeTreasures = () => {
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
+    for (let positionY = 0; positionY < this.rows; positionY++) {
+      for (let positionX = 0; positionX < this.cols; positionX++) {
         if (
           this.treasures.find(
-            treasureItem => treasureItem.x === x && treasureItem.y === y
+            treasureItem =>
+              treasureItem.positionX === positionX &&
+              treasureItem.positionY === positionY
           )
         )
-          this.board[x][y] = true;
-        this.board[x][y] = false;
+          this.board[positionX][positionY] = true;
+        this.board[positionX][positionY] = false;
       }
     }
   };
@@ -82,11 +84,11 @@ class Game extends React.Component {
     let cells = [];
     let color = `#554562`;
 
-    for (let x = 0; x < this.rows; x++) {
-      for (let y = 0; y < this.cols; y++) {
+    for (let positionX = 0; positionX < this.rows; positionX++) {
+      for (let positionY = 0; positionY < this.cols; positionY++) {
         cells.push({
-          x: x,
-          y: y,
+          positionX: positionX,
+          positionY: positionY,
           color: color,
           value: "",
           isEnabled: isEnabled
@@ -104,7 +106,8 @@ class Game extends React.Component {
     let i = 0;
     user_answers.forEach(item => {
       const objIndex = cells_values.findIndex(
-        cell => cell.x === item.x && cell.y === item.y
+        cell =>
+          cell.positionX === item.positionX && cell.positionY === item.positionY
       );
 
       if (user_cells_values[i].value.includes(`T`)) {
@@ -132,7 +135,9 @@ class Game extends React.Component {
 
   checkIfCellWasClicked = pointOnMap => {
     const objIndex = this.state.cells.findIndex(
-      obj => obj.x === pointOnMap.x && obj.y === pointOnMap.y
+      obj =>
+        obj.positionX === pointOnMap.positionX &&
+        obj.positionY === pointOnMap.positionY
     );
 
     if (this.state.cells[objIndex].isEnabled === false) {
@@ -186,10 +191,10 @@ class Game extends React.Component {
     if (this.checkIfCellWasClicked(pointOnMap)) return;
 
     if (
-      pointOnMap.x >= 0 &&
-      pointOnMap.x <= this.cols &&
-      pointOnMap.y >= 0 &&
-      pointOnMap.y <= this.rows
+      pointOnMap.positionX >= 0 &&
+      pointOnMap.positionX <= this.cols &&
+      pointOnMap.positionY >= 0 &&
+      pointOnMap.positionY <= this.rows
     ) {
       this.user.movements.push(pointOnMap);
     }
@@ -298,12 +303,12 @@ class Game extends React.Component {
               {cells.map(cell => {
                 return (
                   <Cell
-                    x={cell.x}
-                    y={cell.y}
+                    positionX={cell.positionX}
+                    positionY={cell.positionY}
                     color={cell.color}
                     value={cell.value}
                     isEnabled={cell.isEnabled}
-                    key={`${cell.x},${cell.y}`}
+                    key={`${cell.positionX},${cell.positionY}`}
                   />
                 );
               })}

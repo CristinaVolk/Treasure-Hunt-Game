@@ -8,9 +8,13 @@ let users = [];
 
 function generateTreasureMap() {
   let treasure_map = [];
-  for (let x = 0; x < ROWS; x++) {
-    for (let y = 0; y < COLLS; y++) {
-      treasure_map.push({ x: x, y: y, value: "" });
+  for (let positionX = 0; positionX < ROWS; positionX++) {
+    for (let positionY = 0; positionY < COLLS; positionY++) {
+      treasure_map.push({
+        positionX: positionX,
+        positionY: positionY,
+        value: ""
+      });
     }
   }
   return treasure_map;
@@ -41,15 +45,23 @@ const makeMove = (name, user_movements, treasureMap, treasures) => {
     user_movements,
     treasures
   );
+  console.log("treasureMap", treasureMap);
+  console.log("treasure", treasures);
+  console.log("user_val", movementsAsignedValues);
 
   if (currentUserIndex !== -1) {
-    user_movements.forEach(movement => {
+    movementsAsignedValues.forEach(movement => {
+      console.log(users[currentUserIndex]);
       users[currentUserIndex].movements.push(movement);
     });
 
-    movementsAsignedValues.forEach(field => {
+    movementsAsignedValues.map(field => {
       const mapFieldIndex = treasureMap.findIndex(mapField => {
-        return mapField.x === field.positionX && mapField.y === field.positionY;
+        console.log(field);
+        return (
+          mapField.positionX === field.positionX &&
+          mapField.positionY === field.positionY
+        );
       });
       treasureMap[mapFieldIndex].value = field.value;
     });

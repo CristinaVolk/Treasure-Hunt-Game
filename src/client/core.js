@@ -4,13 +4,12 @@ const CELL_SIZE = 100;
 
 const makeEmptyBoard = () => {
   let board = [];
-  for (let x = 0; x < ROWS; x++) {
-    board[x] = [];
-    for (let y = 0; y < COLLS; y++) {
-      board[x][y] = false;
+  for (let positionX = 0; positionX < ROWS; positionX++) {
+    board[positionX] = [];
+    for (let positionY = 0; positionY < COLLS; positionY++) {
+      board[positionX][positionY] = false;
     }
   }
-
   return board;
 };
 
@@ -19,18 +18,18 @@ const getElementOffset = boardRef => {
   const doc = document.documentElement;
 
   return {
-    x: rect.left + window.pageXOffset - doc.clientLeft,
-    y: rect.top + window.pageYOffset - doc.clientTop
+    positionX: rect.left + window.pageXOffset - doc.clientLeft,
+    positionY: rect.top + window.pageYOffset - doc.clientTop
   };
 };
 
 const obtainCoordinatesFromClick = (event, elemOffset) => {
-  const offsetX = event.clientX - elemOffset.x;
-  const offsetY = event.clientY - elemOffset.y;
+  const offsetX = event.clientX - elemOffset.positionX;
+  const offsetY = event.clientY - elemOffset.positionY;
 
-  const x = Math.floor(offsetX / CELL_SIZE);
-  const y = Math.floor(offsetY / CELL_SIZE);
-  let pointOnMap = { x: x, y: y };
+  const positionX = Math.floor(offsetX / CELL_SIZE);
+  const positionY = Math.floor(offsetY / CELL_SIZE);
+  let pointOnMap = { positionX: positionX, positionY: positionY };
   return pointOnMap;
 };
 

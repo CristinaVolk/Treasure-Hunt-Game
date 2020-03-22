@@ -6,18 +6,20 @@ const generateTreasures = () => {
   let treasures = [];
   let i = 0;
   while (i < 3) {
-    let x = getRandomInt(5);
-    let y = getRandomInt(5);
-    if (check_exists(x, y, treasures)) continue;
+    let positionX = getRandomInt(5);
+    let positionY = getRandomInt(5);
+    if (check_exists(positionX, positionY, treasures)) continue;
 
-    treasures.push({ x, y });
+    treasures.push({ positionX, positionY });
     i++;
   }
   return treasures;
 };
 
-const check_exists = (x, y, map_array) => {
-  return map_array.find(item => item.x === x && item.y === y);
+const check_exists = (positionX, positionY, map_array) => {
+  return map_array.find(
+    item => item.positionX === positionX && item.positionY === positionY
+  );
 };
 
 const check_neighbours = (movements, treasures) => {
@@ -25,36 +27,52 @@ const check_neighbours = (movements, treasures) => {
   let movementsAsignedValues = [];
 
   let diagonal_neighbors = [
-    { y_n: -1, x_n: -1 },
-    { y_n: -1, x_n: 1 },
-    { y_n: 1, x_n: 1 },
-    { y_n: 1, x_n: -1 }
+    { stepDiagonalX: -1, stepDiagonalY: -1 },
+    { stepDiagonalX: -1, stepDiagonalY: 1 },
+    { stepDiagonalX: 1, stepDiagonalY: 1 },
+    { stepDiagonalX: 1, stepDiagonalY: -1 }
   ];
 
   let side_neighbors = [
-    { y_n: -1, x_n: 0 },
-    { y_n: 0, x_n: 1 },
-    { y_n: 1, x_n: 0 },
-    { y_n: 0, x_n: -1 }
+    { stepSideX: 0, stepSideY: -1 },
+    { stepSideX: 1, stepSideY: 0 },
+    { stepSideX: 0, stepSideY: 1 },
+    { stepSideX: -1, stepSideY: 0 }
   ];
 
   movements.forEach(movement => {
-    if (check_exists(movement.x, movement.y, treasures)) {
+    if (check_exists(movement.positionX, movement.positionY, treasures)) {
       cellValue = `T`;
     } else {
       for (let i = 0; i < diagonal_neighbors.length; i++) {
-        let x1 = movement.x + diagonal_neighbors[i].x_n;
-        let y1 = movement.y + diagonal_neighbors[i].y_n;
+        let positionXDiagonalNeighbour =
+          movement.positionX + diagonal_neighbors[i].stepDiagonalX;
+        let positionYDiagonalNeighbour =
+          movement.positionY + diagonal_neighbors[i].stepDiagonalY;
 
-        if (check_exists(x1, y1, treasures)) {
+        if (
+          check_exists(
+            positionXDiagonalNeighbour,
+            positionYDiagonalNeighbour,
+            treasures
+          )
+        ) {
           cellValue = `2`;
           break;
         }
       }
       for (let i = 0; i < side_neighbors.length; i++) {
-        let x1 = movement.x + side_neighbors[i].x_n;
-        let y1 = movement.y + side_neighbors[i].y_n;
-        if (check_exists(x1, y1, treasures)) {
+        let positionXSideNeighbour =
+          movement.positionX + side_neighbors[i].stepSideX;
+        let positionYSideNeighbour =
+          movement.positionY + side_neighbors[i].stepSideY;
+        if (
+          check_exists(
+            positionXSideNeighbour,
+            positionYSideNeighbour,
+            treasures
+          )
+        ) {
           cellValue = `3`;
           break;
         }
@@ -62,8 +80,8 @@ const check_neighbours = (movements, treasures) => {
     }
 
     movementsAsignedValues.push({
-      positionX: movement.x,
-      positionY: movement.y,
+      positionX: movement.positionX,
+      positionY: movement.positionY,
       value: cellValue
     });
   });
