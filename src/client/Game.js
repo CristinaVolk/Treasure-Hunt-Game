@@ -203,7 +203,7 @@ class Game extends React.Component {
     }
 
     if (this.user.countClicks === MAX_CLICKS) {
-      
+
       this.runMove(this.user.movements);
       this.updateCells();
 
@@ -263,10 +263,12 @@ class Game extends React.Component {
     };
   };
 
-  stopGame = () => {
+  stopGame = () =>
+  {
+    core.makeEmptyBoard()
+    this.setState( { cells: this.makeCells( false ) } )
     this.setState({ isRunning: false });
     this.setState( { isGameStart: false } );
-    this.setState( { cells: this.makeCells( false ) })
   };
 
   displayResult = async () =>
@@ -275,11 +277,10 @@ class Game extends React.Component {
       const response = await Axios.get( `http://localhost:3005/scores/top/${ this.user.name }` );
       const responseData = await response.data;
       this.user.topResults = responseData;
-    } catch ( err ) { console.log( err ); };
+    } catch ( err ) { console.log( err ) };
   }
 
-
-  render() {
+render() {
     const {
       cells,
       isRunning,
@@ -287,7 +288,7 @@ class Game extends React.Component {
       isGameStart,
       isGameFinished,
       isUser
-    } = this.state;
+  } = this.state;
 
     return (
       <div>
