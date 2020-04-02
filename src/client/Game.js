@@ -2,11 +2,13 @@ import React from "react";
 import "./Game.css";
 import Login from "./Login";
 import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
+const Axios = require( "axios" );
 
-const axios = require("axios");
+
 const db = require("../server/database");
 const gameLogic = require("../server/game_logic");
 const core = require("./core");
+const useAxios = require("./useAxios");
 
 const MAX_MOVES = 8;
 const MAX_TREASURES = 3;
@@ -27,7 +29,8 @@ class Game extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.runGame = this.runGame.bind(this);
     this.runMove = this.runMove.bind(this);
-    this.runSet = this.runSet.bind(this);
+    this.runSet = this.runSet.bind( this );
+    this.displayResult = this.displayResult.bind( this );
   }
 
   state = {
@@ -37,25 +40,27 @@ class Game extends React.Component {
     isEnabled: false,
     isGameStart: false,
     isGameFinished: false,
-    topResults: null,
     isUser: false
   };
 
   handleSubmit = async () => {
     if (this.state.name.length === 0) alert("You should provide your name");
     else {
-      try {
-        let response = await axios.post("http://localhost:3005/user", {
+      /*let responseStatus = useAxios.createUser(this.state.name);
+      console.log( responseStatus );*/
+      Axios
+        .post( "http://localhost:3005/user", {
           name: this.state.name
-        });
-        let res_status = await response.status;
+        } )
+        .then( responseData =>
+        {
+          let responseStatus = responseData.status;
+          //console.log( "res", responseStatus );
 
-        res_status === 201
-          ? this.setState({ isUser: true })
-          : this.setState({ isUser: false });
-      } catch (error) {
-        console.error(error);
-      }
+          responseStatus === 201
+        ? this.setState({ isUser: true })
+            : this.setState( { isUser: false } );
+        } );
     }
   };
 
@@ -175,12 +180,10 @@ class Game extends React.Component {
   };
 
   updateScores = () => {
-    axios
-      .put(`http://localhost:3005/user/score`, {
-        name: this.user.name,
-        score: this.user.score
-      })
-      .then(response => console.log(response, "Score added!"));
+    Axios.put(`http://localhost:3005/user/score`, {
+      name: this.user.name,
+      score: this.user.score
+    }).then(response => console.log(response, "Score added!"));
   };
 
   handleClick = event => {
@@ -200,7 +203,7 @@ class Game extends React.Component {
     }
 
     if (this.user.countClicks === MAX_CLICKS) {
-      this.user.score++;
+      
       this.runMove(this.user.movements);
       this.updateCells();
 
@@ -222,8 +225,10 @@ class Game extends React.Component {
       countTreasure: 0,
       score: 0,
       countSets: 0,
-      countClicks: 0
+      countClicks: 0,
+      topResults:[]
     };
+    this.setState({ isGameFinished: false })
     this.setState({ isUser: true });
     this.setState({ isGameStart: true });
   };
@@ -239,33 +244,40 @@ class Game extends React.Component {
   };
 
   runMove = movements => {
-    axios
-      .post(`http://localhost:3005/user/move`, {
-        name: this.user.name,
-        movements: movements,
-        treasureMap: this.treasureMap,
-        treasures: this.treasures
-      })
-      .then(response => console.log(response, "Movements added!"));
+    Axios.post(`http://localhost:3005/user/move`, {
+      name: this.user.name,
+      movements: movements,
+      treasureMap: this.treasureMap,
+      treasures: this.treasures
+    } ).then( response => this.user.score++);
   };
 
   endMove = () => {
     this.user.countClicks = 0;
     this.user.movements = [];
-    if (this.user.countSets === 10) this.setState({ isGameFinished: true });
+    if ( this.user.countSets === 5 )
+    {
+      this.displayResult();
+      this.setState( { isGameFinished: true } );
+      this.stopGame()
+    };
   };
 
   stopGame = () => {
     this.setState({ isRunning: false });
-    this.setState({ isGameStart: false });
+    this.setState( { isGameStart: false } );
+    this.setState( { cells: this.makeCells( false ) })
   };
 
-  displayResult = () => {
-    const results = axios
-      .get(`http://localhost:3005/scores/top/${this.user.name}`)
-      .then(topResults => this.setState(topResults));
-    return results;
-  };
+  displayResult = async () =>
+  {
+    try {
+      const response = await Axios.get( `http://localhost:3005/scores/top/${ this.user.name }` );
+      const responseData = await response.data;
+      this.user.topResults = responseData;
+    } catch ( err ) { console.log( err ); };
+  }
+
 
   render() {
     const {
@@ -316,11 +328,11 @@ class Game extends React.Component {
 
             <div className="controls">
               {isGameFinished ? (
-                <div>
-                  Your score
-                  {this.displayResult.map((result, index) => {
-                    return <p key={index}>{result}</p>;
-                  })}
+                  <div> <h1>The Game is Over</h1>
+                    Your score
+                    {this.user.topResults.map((result, index) =>
+                    <p key={index}>{result}</p>
+                    )}
                 </div>
               ) : (
                 ""

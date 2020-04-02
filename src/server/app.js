@@ -17,8 +17,10 @@ app.use(cors());
 app.get("/scores/top/:name", async (req, res) => {
   try {
     const { name } = req.params;
-    results = await getBestScores(name);
-    res.json(results);
+    results = await getBestScores( name );
+    console.log( results )
+    res.setHeader( 'Content-Type', 'application/json' )
+    res.json( results );
   } catch (error) {
     console.error(error);
   }

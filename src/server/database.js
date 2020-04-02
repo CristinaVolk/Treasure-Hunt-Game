@@ -45,19 +45,17 @@ const makeMove = (name, user_movements, treasureMap, treasures) => {
     user_movements,
     treasures
   );
-  console.log("treasureMap", treasureMap);
+  /*console.log("treasureMap", treasureMap);
   console.log("treasure", treasures);
-  console.log("user_val", movementsAsignedValues);
+  console.log("user_val", movementsAsignedValues);*/
 
   if (currentUserIndex !== -1) {
     movementsAsignedValues.forEach(movement => {
-      console.log(users[currentUserIndex]);
       users[currentUserIndex].movements.push(movement);
     });
 
     movementsAsignedValues.map(field => {
       const mapFieldIndex = treasureMap.findIndex(mapField => {
-        console.log(field);
         return (
           mapField.positionX === field.positionX &&
           mapField.positionY === field.positionY
