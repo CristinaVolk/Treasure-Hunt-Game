@@ -55,7 +55,7 @@ class Game extends React.Component
       else this.setState( { isUser: false } );
     }
   };
-  
+
   newUser = newValue => this.setState( { name: newValue });
 
   makeTreasures = () =>
@@ -220,17 +220,19 @@ class Game extends React.Component
   };
 
   runGame = () =>
-  {
-    this.user = {
-      name: this.state.name,
-      board: this.board,
-      movements: [],
-      countTreasure: 0,
-      score: 0,
-      countSets: 0,
-      countClicks: 0,
-      topResults: []
-    };
+    {
+    this.user = Object.assign(
+      {
+          name: this.state.name,
+          board: this.board,
+          movements: [],
+          countTreasure: 0,
+          score: 0,
+          countSets: 0,
+          countClicks: 0,
+          topResults: []
+      }, this.user );
+
     this.setState( { isGameFinished: false } );
     this.setState( { isUser: true } );
     this.setState( { isGameStart: true } );
@@ -249,8 +251,16 @@ class Game extends React.Component
 
   runMove = async movements =>
   {
-    console.log(movements)
-    let response = await useAxios.MakeUserMove( this.user.name, movements, this.treasureMap, this.treasures )
+    const config = Object.assign(
+      {
+        name: this.user.name,
+        movements: movements,
+        treasureMap: this.treasureMap,
+        treasures : this.treasures
+      },
+      config
+    );
+    let response = await useAxios.MakeUserMove( config )
     console.log( response.status)
     if ( response.status === 200 ) this.user.score++;
   };

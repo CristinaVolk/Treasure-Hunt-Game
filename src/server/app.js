@@ -38,8 +38,8 @@ app.post("/user", (req, res) => {
 
 app.post("/user/move", (req, res) => {
   try {
-    const { name, movements, treasureMap, treasures } = req.body;
-    const result = makeMove(name, movements, treasureMap, treasures);
+    const config = req.body;
+    const result = makeMove(config);
     res.json(result);
   } catch (error) {
     console.error(error);

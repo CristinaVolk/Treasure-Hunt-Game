@@ -36,18 +36,16 @@ const getBestScores = user_name => {
 
 const addUser = name => users.push({ name, scores: [], movements: [] });
 
-const findUserByName = name => users.find(user => user.name === name);
+const findUserByName = name => users.find( user => user.name === name );
 
-const makeMove = (name, user_movements, treasureMap, treasures) => {
-  const currentUserIndex = users.findIndex(user => user.name === name);
+
+const makeMove = (config) => {
+  const currentUserIndex = users.findIndex(user => user.name === config.name);
 
   const movementsAsignedValues = game_logic.check_neighbours(
-    user_movements,
-    treasures
+    config.movements,
+    config.treasures
   );
-  /*console.log("treasureMap", treasureMap);
-  console.log("treasure", treasures);
-  console.log("user_val", movementsAsignedValues);*/
 
   if (currentUserIndex !== -1) {
     movementsAsignedValues.forEach(movement => {
@@ -55,13 +53,13 @@ const makeMove = (name, user_movements, treasureMap, treasures) => {
     });
 
     movementsAsignedValues.map(field => {
-      const mapFieldIndex = treasureMap.findIndex(mapField => {
+      const mapFieldIndex = config.treasureMap.findIndex(mapField => {
         return (
           mapField.positionX === field.positionX &&
           mapField.positionY === field.positionY
         );
       });
-      treasureMap[mapFieldIndex].value = field.value;
+      config.treasureMap[mapFieldIndex].value = field.value;
     });
   }
 
