@@ -22,7 +22,7 @@ const check_exists = (positionX, positionY, map_array) => {
   );
 };
 
-const check_neighbours = (movements, treasures) => {
+const check_neighbours = ( movements, treasures) => {
   let cellValue = `1`;
   let movementsAsignedValues = [];
 
@@ -40,7 +40,7 @@ const check_neighbours = (movements, treasures) => {
     { stepSideX: -1, stepSideY: 0 }
   ];
 
-  movements.forEach(movement => {
+  movements.map(movement => {
     if (check_exists(movement.positionX, movement.positionY, treasures)) {
       cellValue = `T`;
     } else {
