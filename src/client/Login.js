@@ -1,6 +1,6 @@
 import React from "react";
 
-class Login extends React.Component {
+export class Login extends React.Component {
   constructor(props) {
     super(props);
     this.addNewUser = this.addNewUser.bind(this);
@@ -34,4 +34,4 @@ class Login extends React.Component {
     );
   }
 }
-export default Login;
+

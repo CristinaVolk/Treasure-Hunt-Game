@@ -5,9 +5,9 @@ export const CELL_SIZE = 100;
 export const WIDTH = 500;
 export const HEIGHT = 500;
 
-export default class Cell extends React.Component {
-  render() {
-    const { positionX, positionY, color, value, isEnabled } = this.props;
+export const Cell = (props) => {
+  
+    const { positionX, positionY, color, value, isEnabled } = props;
     return (
       <div
         className="Cell"
@@ -22,6 +22,5 @@ export default class Cell extends React.Component {
       >
         <h1>{value}</h1>
       </div>
-    );
-  }
+  );
 }

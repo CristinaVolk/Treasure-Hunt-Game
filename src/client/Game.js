@@ -1,7 +1,10 @@
 import React from "react";
 import "./Game.css";
-import Login from "./Login";
-import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
+import { Login } from "./Login";
+import { Cell, CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
+import { ResultScore } from "./ResultScore";
+import { ButtonRunGame } from './ButtonRunGame'
+import { ButtonRunSet } from './ButtonRunSet'
 
 const db = require("../server/database");
 const gameLogic = require("../server/game_logic");
@@ -212,7 +215,6 @@ class Game extends React.Component
       if ( this.user.score >= MAX_MOVES )
       {
         this.updateScores();
-        //this.setState( { cells: this.makeCells( false ) } );
         this.setState( { isRunning: false } );
       }
       this.endMove();
@@ -350,38 +352,11 @@ class Game extends React.Component
               </div>
 
               <div className="controls">
-                { isGameFinished ? (
-                  <div> <h1>The Game is Over</h1>
-                    Your score
-                    {this.user.topResults.map( ( result, index ) =>
-                      <p key={ index }>{ result }</p>
-                    ) }
-                  </div>
-                ) : (
-                    ""
-                  ) }
-                { !isGameStart && !isRunning ? (
-                  <button
-                    className="button"
-                    onClick={ this.runGame }
-                    style={ { fontSize: `24px` } }
-                  >
-                    Run Game
-                  </button>
-                ) : (
-                    ""
-                  ) }
-                { !isRunning && isGameStart ? (
-                  <button
-                    className="button"
-                    onClick={ this.runSet }
-                    style={ { fontSize: `24px` } }
-                  >
-                    <p>Press the button to run the Set</p>
-                  </button>
-                ) : (
-                    ""
-                  ) }
+                { isGameFinished && <ResultScore topResults={ this.user.topResults } /> }
+                
+                { !isGameStart && !isRunning && <ButtonRunGame runGame={ this.runGame } /> }
+                
+                { !isRunning && isGameStart && <ButtonRunSet runSet = { this.runSet } /> }
               </div>
             </div>
           ) }
