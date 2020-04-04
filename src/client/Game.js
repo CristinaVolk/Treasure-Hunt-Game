@@ -6,7 +6,7 @@ import Cell, { CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
 const db = require("../server/database");
 const gameLogic = require("../server/game_logic");
 const core = require("./core");
-const useAxios = require("./useAxios");
+const gameQueries = require("./gameQueries");
 
 const MAX_MOVES = 8;
 const MAX_TREASURES = 3;
@@ -48,7 +48,7 @@ class Game extends React.Component
     if ( this.state.name.length === 0 ) alert( "You should provide your name" );
     else
     {
-      let responseStatus = await useAxios.createUser( this.state.name );
+      let responseStatus = await gameQueries.createUser( this.state.name );
       console.log(responseStatus );
 
       if ( responseStatus === 201 ) this.setState( { isUser: true } );
@@ -170,8 +170,8 @@ class Game extends React.Component
 
     if ( this.user.countTreasure >= MAX_TREASURES )
     {
-      this.updateScores();
       this.setState( { isRunning: false } );
+      this.updateScores();
       this.displayResult();
       this.treasures = [];
     }
@@ -209,10 +209,10 @@ class Game extends React.Component
       this.runMove( this.user.movements );
       this.updateCells();
 
-      if ( this.user.score === MAX_MOVES )
+      if ( this.user.score >= MAX_MOVES )
       {
         this.updateScores();
-        this.setState( { cells: this.makeCells( false ) } );
+        //this.setState( { cells: this.makeCells( false ) } );
         this.setState( { isRunning: false } );
       }
       this.endMove();
@@ -240,10 +240,16 @@ class Game extends React.Component
 
   runSet = () =>
   {
+    if ( this.user.countSets >= 3 )
+    {
+      this.displayResult();
+      this.setState( { isGameFinished: true } );
+      this.stopGame();
+    }
     this.board = core.makeEmptyBoard();
     this.treasures = gameLogic.generateTreasures();
     this.user.countTreasure = 0;
-    this.user.score = 0;
+    this.user.score = 1;
     this.user.countSets++;
     this.setState( { isRunning: true } );
     this.setState( { cells: this.makeCells( true ) } );
@@ -251,16 +257,15 @@ class Game extends React.Component
 
   runMove = async movements =>
   {
-    const config = Object.assign(
-      {
+    this.setState( { isRunning: true } );
+    const config = Object.assign({
         name: this.user.name,
         movements: movements,
         treasureMap: this.treasureMap,
         treasures : this.treasures
-      },
-      config
-    );
-    let response = await useAxios.MakeUserMove( config )
+      } );
+    
+    let response = await gameQueries.makeUserMove( config )
     console.log( response.status)
     if ( response.status === 200 ) this.user.score++;
   };
@@ -269,12 +274,7 @@ class Game extends React.Component
   {
     this.user.countClicks = 0;
     this.user.movements = [];
-    if ( this.user.countSets === 5 )
-    {
-      this.displayResult();
-      this.setState( { isGameFinished: true } );
-      this.stopGame();
-    };
+
   };
 
   stopGame = () =>
@@ -287,13 +287,13 @@ class Game extends React.Component
 
   updateScores = async () =>
   {
-    let responseStatus = await useAxios.updateUserScore( this.user.name, this.user.score );
+    let responseStatus = await gameQueries.updateUserScore( this.user.name, this.user.score );
     console.log( responseStatus );
   };
 
   displayResult = async () =>
   {
-    let userScore = await useAxios.fetchScore( this.user.name );
+    let userScore = await gameQueries.fetchScore( this.user.name );
     console.log( userScore )
     if(userScore.length) this.user.topResults = userScore
   };
@@ -342,7 +342,7 @@ class Game extends React.Component
                       positionY={ cell.positionY }
                       color={ cell.color }
                       value={ cell.value }
-                      isEnabled={ cell.isEnabled }
+                      isEnabled={ isRunning }
                       key={ `${ cell.positionX },${ cell.positionY }` }
                     />
                   );

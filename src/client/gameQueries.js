@@ -1,8 +1,8 @@
 const axios = require("axios");
-
+const HOST = `http://localhost:3005`;
 const createUser = userName =>
 {
-  return axios.post( "http://localhost:3005/user", { name: userName } )
+  return axios.post( `${HOST}/user`, { name: userName } )
       .then( result => result.status)
       .catch( error => console.error( error ) );
 }
@@ -10,7 +10,7 @@ const createUser = userName =>
 
 const updateUserScore = ( name, score ) =>
 {
-  return axios.put( `http://localhost:3005/user/score`, {
+  return axios.put( `${HOST}/user/score`, {
       name: name,
       score: score
   } )
@@ -18,16 +18,16 @@ const updateUserScore = ( name, score ) =>
     .catch ( error => console.error( error ) );
 }
 
-const MakeUserMove = ( config ) =>
+const makeUserMove = ( config ) =>
 {
-  return axios.post( `http://localhost:3005/user/move`, config )
+  return axios.post( `${ HOST}/user/move`, config )
     .then( result => result )
     .catch( error => console.error( error ) );
 }
 
 const fetchScore = userName =>
 {
-  return axios.get( `http://localhost:3005/scores/top/${ userName }` )
+  return axios.get( `${ HOST}/scores/top/${ userName }` )
     .then( result => result.data)
     .catch( error => console.error( error ) );
 }
@@ -36,6 +36,6 @@ const fetchScore = userName =>
 module.exports = {
   createUser,
   updateUserScore,
-  MakeUserMove,
+  makeUserMove,
   fetchScore
 };
