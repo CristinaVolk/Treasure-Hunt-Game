@@ -1,369 +1,331 @@
-import React from "react";
-import "./Game.css";
-import { Login } from "./Login";
-import { Cell, CELL_SIZE, HEIGHT, WIDTH } from "./Cell";
-import { ResultScore } from "./ResultScore";
+import React from 'react'
+import './Game.css'
+import { Login } from './Login'
+import { Cell, CELL_SIZE, HEIGHT, WIDTH } from './Cell'
+import { ResultScore } from './ResultScore'
 import { ButtonRunGame } from './ButtonRunGame'
 import { ButtonRunSet } from './ButtonRunSet'
 
-const db = require("../server/database");
-const gameLogic = require("../server/game_logic");
-const core = require("./core");
-const gameQueries = require("./gameQueries");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const db = require('../server/database')
+const gameLogic = require('../server/game_logic')
+const core = require('./core')
+const gameQueries = require( './gameQueries' ).default
 
-const MAX_MOVES = 8;
-const MAX_TREASURES = 3;
-const MAX_CLICKS = 3;
+const MAX_MOVES = 8
+const MAX_TREASURES = 3
+const MAX_CLICKS = 3
 
-class Game extends React.Component
-{
-  constructor ()
-  {
-    super();
-    this.rows = HEIGHT / CELL_SIZE;
-    this.cols = WIDTH / CELL_SIZE;
-    this.board = core.makeEmptyBoard();
-    this.user = null;
-    this.treasureMap = db.generateTreasureMap();
-    this.treasures = gameLogic.generateTreasures();
+class Game extends React.Component {
+  constructor() {
+    super()
+    this.rows = HEIGHT / CELL_SIZE
+    this.cols = WIDTH / CELL_SIZE
+    this.board = core.makeEmptyBoard()
+    this.user = null
+    this.treasureMap = db.generateTreasureMap()
+    this.treasures = gameLogic.generateTreasures()
 
-    this.newUser = this.newUser.bind( this );
-    this.handleSubmit = this.handleSubmit.bind( this );
-    this.handleClick = this.handleClick.bind( this );
-    this.runGame = this.runGame.bind( this );
-    this.runMove = this.runMove.bind( this );
-    this.runSet = this.runSet.bind( this );
-    this.displayResult = this.displayResult.bind( this );
+    this.newUser = this.newUser.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+    this.runGame = this.runGame.bind(this)
+    this.runMove = this.runMove.bind(this)
+    this.runSet = this.runSet.bind(this)
+    this.displayResult = this.displayResult.bind(this)
   }
 
   state = {
     cells: [],
     isRunning: false,
-    name: "",
+    name: '',
     isEnabled: false,
     isGameStart: false,
     isGameFinished: false,
-    isUser: false
-  };
+    isUser: false,
+  }
 
-  handleSubmit = async () =>
-  {
-    if ( this.state.name.length === 0 ) alert( "You should provide your name" );
-    else
-    {
-      let responseStatus = await gameQueries.createUser( this.state.name );
-      console.log(responseStatus );
+  handleSubmit = async () => {
+    if (this.state.name.length === 0) alert('You should provide your name')
+    else {
+      const responseStatus = await gameQueries.createUser(this.state.name)
+      console.log(responseStatus)
 
-      if ( responseStatus === 201 ) this.setState( { isUser: true } );
-      else this.setState( { isUser: false } );
+      if (responseStatus === 201) this.setState({ isUser: true })
+      else this.setState({ isUser: false })
     }
-  };
+  }
 
-  newUser = newValue => this.setState( { name: newValue });
+  newUser = (newValue) => this.setState({ name: newValue })
 
-  makeTreasures = () =>
-  {
-    for ( let positionY = 0; positionY < this.rows; positionY++ )
-    {
-      for ( let positionX = 0; positionX < this.cols; positionX++ )
-      {
+  makeTreasures = () => {
+    for (let positionY = 0; positionY < this.rows; positionY++) {
+      for (let positionX = 0; positionX < this.cols; positionX++) {
         if (
           this.treasures.find(
-            treasureItem =>
+            (treasureItem) =>
               treasureItem.positionX === positionX &&
               treasureItem.positionY === positionY
           )
         )
-          this.board[ positionX ][ positionY ] = true;
-        this.board[ positionX ][ positionY ] = false;
+          this.board[positionX][positionY] = true
+        this.board[positionX][positionY] = false
       }
     }
-  };
+  }
 
-  makeCells = isEnabled =>
-  {
-    this.user.countTreasure = 0;
-    let cells = [];
-    let color = `#554562`;
+  makeCells = (isEnabled) => {
+    this.user.countTreasure = 0
+    const cells = []
+    const color = '#554562'
 
-    for ( let positionX = 0; positionX < this.rows; positionX++ )
-    {
-      for ( let positionY = 0; positionY < this.cols; positionY++ )
-      {
-        cells.push( {
-          positionX: positionX,
-          positionY: positionY,
-          color: color,
-          value: "",
-          isEnabled: isEnabled
-        } );
+    for (let positionX = 0; positionX < this.rows; positionX++) {
+      for (let positionY = 0; positionY < this.cols; positionY++) {
+        cells.push({
+          positionX,
+          positionY,
+          color,
+          value: '',
+          isEnabled,
+        })
       }
     }
 
-    return cells;
-  };
+    return cells
+  }
 
-  changeCells = user_cells_values =>
-  {
-    let cells_values = this.state.cells;
-    let user_answers = this.user.movements;
+  changeCells = (user_cells_values) => {
+    const cells_values = this.state.cells
+    const user_answers = this.user.movements
 
-    let i = 0;
-    user_answers.forEach( item =>
-    {
+    let i = 0
+    user_answers.forEach((item) => {
       const objIndex = cells_values.findIndex(
-        cell =>
+        (cell) =>
           cell.positionX === item.positionX && cell.positionY === item.positionY
-      );
+      )
 
-      if ( user_cells_values[ i ].value.includes( `T` ) )
-      {
-        cells_values[ objIndex ].color = `#ee6c75`;
-        cells_values[ objIndex ].value = `T`;
-        cells_values[ objIndex ].isEnabled = false;
-      } else if ( user_cells_values[ i ].value.includes( `3` ) )
-      {
-        cells_values[ objIndex ].color = `#ddc1cc`;
-        cells_values[ objIndex ].value = `3`;
-        cells_values[ objIndex ].isEnabled = false;
-      } else if ( user_cells_values[ i ].value.includes( `2` ) )
-      {
-        cells_values[ objIndex ].color = `#e4f1e7`;
-        cells_values[ objIndex ].value = `2`;
-        cells_values[ objIndex ].isEnabled = false;
-      } else if ( user_cells_values[ i ].value.includes( `1` ) )
-      {
-        cells_values[ objIndex ].color = `#e1eafb`;
-        cells_values[ objIndex ].value = `1`;
-        cells_values[ objIndex ].isEnabled = false;
+      if (user_cells_values[i].value.includes('T')) {
+        cells_values[objIndex].color = '#ee6c75'
+        cells_values[objIndex].value = 'T'
+        cells_values[objIndex].isEnabled = false
+      } else if (user_cells_values[i].value.includes('3')) {
+        cells_values[objIndex].color = '#ddc1cc'
+        cells_values[objIndex].value = '3'
+        cells_values[objIndex].isEnabled = false
+      } else if (user_cells_values[i].value.includes('2')) {
+        cells_values[objIndex].color = '#e4f1e7'
+        cells_values[objIndex].value = '2'
+        cells_values[objIndex].isEnabled = false
+      } else if (user_cells_values[i].value.includes('1')) {
+        cells_values[objIndex].color = '#e1eafb'
+        cells_values[objIndex].value = '1'
+        cells_values[objIndex].isEnabled = false
       }
-      i++;
-    } );
+      i++
+    })
 
-    return cells_values;
-  };
+    return cells_values
+  }
 
-  checkIfCellWasClicked = pointOnMap =>
-  {
+  checkIfCellWasClicked = (pointOnMap) => {
     const objIndex = this.state.cells.findIndex(
-      obj =>
+      (obj) =>
         obj.positionX === pointOnMap.positionX &&
         obj.positionY === pointOnMap.positionY
-    );
+    )
 
-    if ( this.state.cells[ objIndex ].isEnabled === false )
-    {
-      this.user.countClicks--;
-      return true;
+    if (this.state.cells[objIndex].isEnabled === false) {
+      this.user.countClicks-=1
+      return true
     }
-    return false;
-  };
+    return false
+  }
 
-  updateCells = () =>
-  {
-    let selectedCellsAssighed = gameLogic.check_neighbours(
+  updateCells = () => {
+    const selectedCellsAssighed = gameLogic.check_neighbours(
       this.user.movements,
       this.treasures
-    );
+    )
 
-    selectedCellsAssighed.forEach( answer =>
-    {
-      if ( answer.value === `T` ) this.user.countTreasure++;
-    } );
+    selectedCellsAssighed.forEach((answer) => {
+      if (answer.value === 'T') this.user.countTreasure+=1
+    })
 
-    if ( this.user.countTreasure >= MAX_TREASURES )
-    {
-      this.setState( { isRunning: false } );
-      this.updateScores();
-      this.displayResult();
-      this.treasures = [];
+    if (this.user.countTreasure >= MAX_TREASURES) {
+      this.setState({ isRunning: false })
+      this.updateScores()
+      this.displayResult()
+      this.treasures = []
     }
 
-    const updatedCells = this.changeCells(
-      selectedCellsAssighed,
-      this.user.score
-    );
+    const updatedCells = this.changeCells(selectedCellsAssighed, this.user.score)
 
-    this.setState( {
-      cells: updatedCells
-    } );
-  };
+    this.setState({
+      cells: updatedCells,
+    })
+  }
 
-  handleClick = event =>
-  {
-    this.user.countClicks++;
-    const elemOffset = core.getElementOffset( this.boardRef );
-    const pointOnMap = core.obtainCoordinatesFromClick( event, elemOffset );
+  handleClick = (event) => {
+    this.user.countClicks+=1
+    const elemOffset = core.getElementOffset(this.boardRef)
+    const pointOnMap = core.obtainCoordinatesFromClick(event, elemOffset)
 
-    if ( this.checkIfCellWasClicked( pointOnMap ) ) return;
+    if (this.checkIfCellWasClicked(pointOnMap)) return
 
     if (
       pointOnMap.positionX >= 0 &&
       pointOnMap.positionX <= this.cols &&
       pointOnMap.positionY >= 0 &&
       pointOnMap.positionY <= this.rows
-    )
-    {
-      this.user.movements.push( pointOnMap );
+    ) {
+      this.user.movements.push(pointOnMap)
     }
 
-    if ( this.user.countClicks === MAX_CLICKS )
-    {
-      this.runMove( this.user.movements );
-      this.updateCells();
+    if (this.user.countClicks === MAX_CLICKS) {
+      this.runMove(this.user.movements)
+      this.updateCells()
 
-      if ( this.user.score >= MAX_MOVES )
-      {
-        this.updateScores();
-        this.setState( { isRunning: false } );
+      if (this.user.score >= MAX_MOVES) {
+        this.updateScores()
+        this.setState({ isRunning: false })
       }
-      this.endMove();
+      this.endMove()
     }
-  };
+  }
 
-  runGame = () =>
-    {
-    this.user = Object.assign(
-      {
-          name: this.state.name,
-          board: this.board,
-          movements: [],
-          countTreasure: 0,
-          score: 0,
-          countSets: 0,
-          countClicks: 0,
-          topResults: []
-      }, this.user );
-
-    this.setState( { isGameFinished: false } );
-    this.setState( { isUser: true } );
-    this.setState( { isGameStart: true } );
-  };
-
-  runSet = () =>
-  {
-    if ( this.user.countSets >= 3 )
-    {
-      this.displayResult();
-      this.setState( { isGameFinished: true } );
-      this.stopGame();
+  runGame = () => {
+    this.user = {
+      name: this.state.name,
+        board: this.board,
+        movements: [],
+        countTreasure: 0,
+        score: 0,
+        countSets: 0,
+        countClicks: 0,
+        topResults: [],
+      ...this.user
     }
-    this.board = core.makeEmptyBoard();
-    this.treasures = gameLogic.generateTreasures();
-    this.user.countTreasure = 0;
-    this.user.score = 1;
-    this.user.countSets++;
-    this.setState( { isRunning: true } );
-    this.setState( { cells: this.makeCells( true ) } );
-  };
 
-  runMove = async movements =>
-  {
-    this.setState( { isRunning: true } );
-    const config = Object.assign({
-        name: this.user.name,
-        movements: movements,
-        treasureMap: this.treasureMap,
-        treasures : this.treasures
-      } );
-    
-    let response = await gameQueries.makeUserMove( config )
-    console.log( response.status)
-    if ( response.status === 200 ) this.user.score++;
-  };
+    this.setState({ isGameFinished: false })
+    this.setState({ isUser: true })
+    this.setState({ isGameStart: true })
+  }
 
-  endMove = () =>
-  {
-    this.user.countClicks = 0;
-    this.user.movements = [];
+  runSet = () => {
+    if (this.user.countSets >= 3) {
+      this.displayResult()
+      this.setState({ isGameFinished: true })
+      this.stopGame()
+    }
+    this.board = core.makeEmptyBoard()
+    this.treasures = gameLogic.generateTreasures()
+    this.user.countTreasure = 0
+    this.user.score = 1
+    this.user.countSets+=1
+    this.setState({ isRunning: true })
+    this.setState({ cells: this.makeCells(true) })
+  }
 
-  };
+  runMove = async (movements) => {
+    this.setState({ isRunning: true })
+    const config = {name: this.user.name,
+      movements,
+      treasureMap: this.treasureMap,
+      treasures: this.treasures,}
 
-  stopGame = () =>
-  {
-    core.makeEmptyBoard();
-    this.setState( { cells: this.makeCells( false ) } );
-    this.setState( { isRunning: false } );
-    this.setState( { isGameStart: false } );
-  };
+    const response = await gameQueries.makeUserMove(config)
+    console.log(response.status)
+    if (response.status === 200) this.user.score+=1
+  }
 
-  updateScores = async () =>
-  {
-    let responseStatus = await gameQueries.updateUserScore( this.user.name, this.user.score );
-    console.log( responseStatus );
-  };
+  endMove = () => {
+    this.user.countClicks = 0
+    this.user.movements = []
+  }
 
-  displayResult = async () =>
-  {
-    let userScore = await gameQueries.fetchScore( this.user.name );
-    console.log( userScore )
-    if(userScore.length) this.user.topResults = userScore
-  };
+  stopGame = () => {
+    core.makeEmptyBoard()
+    this.setState({ cells: this.makeCells(false) })
+    this.setState({ isRunning: false })
+    this.setState({ isGameStart: false })
+  }
 
+  updateScores = async () => {
+    const responseStatus = await gameQueries.updateUserScore(
+      this.user.name,
+      this.user.score
+    )
+    console.log(responseStatus)
+  }
 
-  render ()
-  {
+  displayResult = async () => {
+    const userScore = await gameQueries.fetchScore(this.user.name)
+    console.log(userScore)
+    if (userScore.length) this.user.topResults = userScore
+  }
+
+  render() {
     const {
       cells,
       isRunning,
       name,
       isGameStart,
       isGameFinished,
-      isUser
-    } = this.state;
+      isUser,
+    } = this.state
 
     return (
       <div>
-        { !isUser ? (
+        {!isUser ? (
           <Login
-            onUser={ this.newUser }
-            onHandleSubmit={ this.handleSubmit }
-            name={ name }
+            onUser={this.newUser}
+            onHandleSubmit={this.handleSubmit}
+            name={name}
           />
         ) : (
-            <div>
-              <div
-                className="Board"
-                style={ {
-                  width: WIDTH,
-                  height: HEIGHT,
-                  backgroundSize: `${ CELL_SIZE }px ${ CELL_SIZE }px`,
-                  pointerEvents: `none`
-                } }
-                onClick={ this.handleClick }
-                ref={ n =>
-                {
-                  this.boardRef = n;
-                } }
-              >
-                { cells.map( cell =>
-                {
-                  return (
-                    <Cell
-                      positionX={ cell.positionX }
-                      positionY={ cell.positionY }
-                      color={ cell.color }
-                      value={ cell.value }
-                      isEnabled={ isRunning }
-                      key={ `${ cell.positionX },${ cell.positionY }` }
-                    />
-                  );
-                } ) }
-              </div>
-
-              <div className="controls">
-                { isGameFinished && <ResultScore topResults={ this.user.topResults } /> }
-                
-                { !isGameStart && !isRunning && <ButtonRunGame runGame={ this.runGame } /> }
-                
-                { !isRunning && isGameStart && <ButtonRunSet runSet = { this.runSet } /> }
-              </div>
+          <div>
+            <div
+              className="Board"
+              style={{
+                width: WIDTH,
+                height: HEIGHT,
+                backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
+                pointerEvents: 'none',
+              }}
+              onClick={this.handleClick}
+              ref={(n) => {
+                this.boardRef = n
+              }}
+            >
+              {cells.map((cell) => {
+                return (
+                  <Cell
+                    positionX={cell.positionX}
+                    positionY={cell.positionY}
+                    color={cell.color}
+                    value={cell.value}
+                    isEnabled={isRunning}
+                    key={`${cell.positionX},${cell.positionY}`}
+                  />
+                )
+              })}
             </div>
-          ) }
+
+            <div className="controls">
+              {isGameFinished && <ResultScore topResults={this.user.topResults} />}
+
+              {!isGameStart && !isRunning && (
+                <ButtonRunGame runGame={this.runGame} />
+              )}
+
+              {!isRunning && isGameStart && <ButtonRunSet runSet={this.runSet} />}
+            </div>
+          </div>
+        )}
       </div>
-    );
+    )
   }
 }
 
-
-export default Game;
+export default Game

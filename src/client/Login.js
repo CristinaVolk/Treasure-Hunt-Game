@@ -1,37 +1,36 @@
-import React from "react";
+import React from 'react'
 
 export class Login extends React.Component {
   constructor(props) {
-    super(props);
-    this.addNewUser = this.addNewUser.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
+    super(props)
+    this.addNewUser = this.addNewUser.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
   }
 
-  addNewUser = event => {
-    event.preventDefault();
-    this.props.onUser(event.target.value);
-  };
+  addNewUser = (event) => {
+    event.preventDefault()
+    this.props.onUser(event.target.value)
+  }
 
-  onSubmit = event => {
-    event.preventDefault();
-    this.props.onHandleSubmit();
-  };
+  onSubmit = (event) => {
+    event.preventDefault()
+    this.props.onHandleSubmit()
+  }
 
   render() {
     return (
-      <form onSubmit={this.onSubmit} style={{ fontSize: `24px` }}>
+      <form onSubmit={this.onSubmit} style={{ fontSize: '24px' }}>
         <label>
           Name :
           <input
             type="text"
             value={this.props.name}
             onChange={this.addNewUser}
-            style={{ fontSize: `24px` }}
+            style={{ fontSize: '24px' }}
           />
         </label>
-        <input style={{ fontSize: `24px` }} type="submit" value="Submit" />
+        <input style={{ fontSize: '24px' }} type="submit" value="Submit" />
       </form>
-    );
+    )
   }
 }
-

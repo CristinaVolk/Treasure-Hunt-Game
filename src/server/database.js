@@ -1,70 +1,69 @@
-const game_logic = require("./game_logic");
+const game_logic = require("./game_logic")
 
-const COLLS = 5;
-const ROWS = 5;
-const SCORE_LIMIT = 10;
+const COLLS = 5
+const ROWS = 5
+const SCORE_LIMIT = 10
 
-let users = [];
+let users = []
 
 function generateTreasureMap() {
-  let treasure_map = [];
+  let treasure_map = []
   for (let positionX = 0; positionX < ROWS; positionX++) {
     for (let positionY = 0; positionY < COLLS; positionY++) {
       treasure_map.push({
         positionX: positionX,
         positionY: positionY,
-        value: ""
-      });
+        value: "",
+      })
     }
   }
-  return treasure_map;
+  return treasure_map
 }
 
-const getUserScore = user_name => {
-  const user = findUserByName(user_name);
-  return user ? user.scores : [];
-};
+const getUserScore = (user_name) => {
+  const user = findUserByName(user_name)
+  return user ? user.scores : []
+}
 
-const getBestScores = user_name => {
-  let topResults;
-  const foundUser = findUserByName(user_name);
+const getBestScores = (user_name) => {
+  let topResults
+  const foundUser = findUserByName(user_name)
   if (foundUser) {
-    topResults = foundUser.scores.sort((a, b) => a > b).slice(0, SCORE_LIMIT);
+    topResults = foundUser.scores.sort((a, b) => a > b).slice(0, SCORE_LIMIT)
   }
-  return topResults;
-};
+  return topResults
+}
 
-const addUser = name => users.push({ name, scores: [], movements: [] });
+const addUser = (name) => users.push({ name, scores: [], movements: [] })
 
-const findUserByName = name => users.find( user => user.name === name );
-
+const findUserByName = (name) => users.find((user) => user.name === name)
 
 const makeMove = (config) => {
-  const currentUserIndex = users.findIndex(user => user.name === config.name);
+  const currentUserIndex = users.findIndex((user) => user.name === config.name)
 
   const movementsAsignedValues = game_logic.check_neighbours(
     config.movements,
     config.treasures
-  );
+  )
 
   if (currentUserIndex !== -1) {
-    movementsAsignedValues.forEach(movement => {
-      users[currentUserIndex].movements.push(movement);
-    });
+    movementsAsignedValues.forEach((movement) => {
+      users[currentUserIndex].movements.push(movement)
+    })
 
-    movementsAsignedValues.map(field => {
-      const mapFieldIndex = config.treasureMap.findIndex(mapField => {
+    movementsAsignedValues.map((field) => {
+      const mapFieldIndex = config.treasureMap.findIndex((mapField) => {
         return (
           mapField.positionX === field.positionX &&
           mapField.positionY === field.positionY
-        );
-      });
-      config.treasureMap[mapFieldIndex].value = field.value;
-    });
+        )
+      })
+      config.treasureMap[mapFieldIndex].value = field.value
+    })
   }
 
-  return movementsAsignedValues;
-};
+  return movementsAsignedValues
+}
 
 module.exports = {
   getBestScores,
@@ -72,5 +71,5 @@ module.exports = {
   findUserByName,
   getUserScore,
   generateTreasureMap,
-  addUser
-};
+  addUser,
+}
