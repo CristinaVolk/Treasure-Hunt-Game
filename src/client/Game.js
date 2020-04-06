@@ -5,12 +5,10 @@ import { Cell, CELL_SIZE, HEIGHT, WIDTH } from './Cell'
 import { ResultScore } from './ResultScore'
 import { ButtonRunGame } from './ButtonRunGame'
 import { ButtonRunSet } from './ButtonRunSet'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const db = require('../server/database')
-const gameLogic = require('../server/game_logic')
-const core = require('./core')
-const gameQueries = require( './gameQueries' ).default
+import { db } from '../server/database'
+import { gameLogic } from '../server/game_logic'
+import { core } from './core'
+import { gameQueries } from './gameQueries'
 
 const MAX_MOVES = 8
 const MAX_TREASURES = 3
@@ -59,8 +57,8 @@ class Game extends React.Component {
   newUser = (newValue) => this.setState({ name: newValue })
 
   makeTreasures = () => {
-    for (let positionY = 0; positionY < this.rows; positionY++) {
-      for (let positionX = 0; positionX < this.cols; positionX++) {
+    for (let positionY = 0; positionY < this.rows; positionY+=1) {
+      for (let positionX = 0; positionX < this.cols; positionX+=1) {
         if (
           this.treasures.find(
             (treasureItem) =>
@@ -79,8 +77,8 @@ class Game extends React.Component {
     const cells = []
     const color = '#554562'
 
-    for (let positionX = 0; positionX < this.rows; positionX++) {
-      for (let positionY = 0; positionY < this.cols; positionY++) {
+    for (let positionX = 0; positionX < this.rows; positionX+=1) {
+      for (let positionY = 0; positionY < this.cols; positionY+=1) {
         cells.push({
           positionX,
           positionY,
@@ -94,38 +92,38 @@ class Game extends React.Component {
     return cells
   }
 
-  changeCells = (user_cells_values) => {
-    const cells_values = this.state.cells
-    const user_answers = this.user.movements
+  changeCells = (userCellsValues) => {
+    const cellsValues = this.state.cells
+    const userAnswers = this.user.movements
 
     let i = 0
-    user_answers.forEach((item) => {
-      const objIndex = cells_values.findIndex(
+    userAnswers.forEach((item) => {
+      const objIndex = cellsValues.findIndex(
         (cell) =>
           cell.positionX === item.positionX && cell.positionY === item.positionY
       )
 
-      if (user_cells_values[i].value.includes('T')) {
-        cells_values[objIndex].color = '#ee6c75'
-        cells_values[objIndex].value = 'T'
-        cells_values[objIndex].isEnabled = false
-      } else if (user_cells_values[i].value.includes('3')) {
-        cells_values[objIndex].color = '#ddc1cc'
-        cells_values[objIndex].value = '3'
-        cells_values[objIndex].isEnabled = false
-      } else if (user_cells_values[i].value.includes('2')) {
-        cells_values[objIndex].color = '#e4f1e7'
-        cells_values[objIndex].value = '2'
-        cells_values[objIndex].isEnabled = false
-      } else if (user_cells_values[i].value.includes('1')) {
-        cells_values[objIndex].color = '#e1eafb'
-        cells_values[objIndex].value = '1'
-        cells_values[objIndex].isEnabled = false
+      if (userCellsValues[i].value.includes('T')) {
+        cellsValues[objIndex].color = '#ee6c75'
+        cellsValues[objIndex].value = 'T'
+        cellsValues[objIndex].isEnabled = false
+      } else if (userCellsValues[i].value.includes('3')) {
+        cellsValues[objIndex].color = '#ddc1cc'
+        cellsValues[objIndex].value = '3'
+        cellsValues[objIndex].isEnabled = false
+      } else if (userCellsValues[i].value.includes('2')) {
+        cellsValues[objIndex].color = '#e4f1e7'
+        cellsValues[objIndex].value = '2'
+        cellsValues[objIndex].isEnabled = false
+      } else if (userCellsValues[i].value.includes('1')) {
+        cellsValues[objIndex].color = '#e1eafb'
+        cellsValues[objIndex].value = '1'
+        cellsValues[objIndex].isEnabled = false
       }
-      i++
+      i+=1
     })
 
-    return cells_values
+    return cellsValues
   }
 
   checkIfCellWasClicked = (pointOnMap) => {
@@ -143,7 +141,7 @@ class Game extends React.Component {
   }
 
   updateCells = () => {
-    const selectedCellsAssighed = gameLogic.check_neighbours(
+    const selectedCellsAssighed = gameLogic.checkNeighbours(
       this.user.movements,
       this.treasures
     )

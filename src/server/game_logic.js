@@ -3,71 +3,71 @@ const getRandomInt = (max) => {
 }
 
 const generateTreasures = () => {
-  let treasures = []
+  const treasures = []
   let i = 0
   while (i < 3) {
-    let positionX = getRandomInt(5)
-    let positionY = getRandomInt(5)
-    if (check_exists(positionX, positionY, treasures)) continue
+    const positionX = getRandomInt(5)
+    const positionY = getRandomInt(5)
+    if ( checkTreasureContained( positionX, positionY, treasures ) ) continue
 
     treasures.push({ positionX, positionY })
-    i++
+    i+=1
   }
   return treasures
 }
 
-const check_exists = (positionX, positionY, map_array) => {
-  return map_array.find(
+const checkTreasureContained = (positionX, positionY, mapArray) => {
+  return mapArray.find(
     (item) => item.positionX === positionX && item.positionY === positionY
   )
 }
 
-const check_neighbours = (movements, treasures) => {
-  let cellValue = `1`
-  let movementsAsignedValues = []
+const checkNeighbours = (movements, treasures) => {
+  let cellValue = '1'
+  const movementsAsignedValues = []
 
-  let diagonal_neighbors = [
+  const diagonalNeighbors = [
     { stepDiagonalX: -1, stepDiagonalY: -1 },
     { stepDiagonalX: -1, stepDiagonalY: 1 },
     { stepDiagonalX: 1, stepDiagonalY: 1 },
     { stepDiagonalX: 1, stepDiagonalY: -1 },
   ]
 
-  let side_neighbors = [
+  const sideNeighbors = [
     { stepSideX: 0, stepSideY: -1 },
     { stepSideX: 1, stepSideY: 0 },
     { stepSideX: 0, stepSideY: 1 },
     { stepSideX: -1, stepSideY: 0 },
   ]
 
-  movements.map((movement) => {
-    if (check_exists(movement.positionX, movement.positionY, treasures)) {
-      cellValue = `T`
+  movements.forEach((movement) => {
+    if (checkTreasureContained(movement.positionX, movement.positionY, treasures)) {
+      cellValue = 'T'
     } else {
-      for (let i = 0; i < diagonal_neighbors.length; i++) {
-        let positionXDiagonalNeighbour =
-          movement.positionX + diagonal_neighbors[i].stepDiagonalX
-        let positionYDiagonalNeighbour =
-          movement.positionY + diagonal_neighbors[i].stepDiagonalY
+      for (let i = 0; i < diagonalNeighbors.length; i+=1) {
+        const positionXDiagonalNeighbour =
+          movement.positionX + diagonalNeighbors[i].stepDiagonalX
+        const positionYDiagonalNeighbour =
+          movement.positionY + diagonalNeighbors[i].stepDiagonalY
 
         if (
-          check_exists(
+          checkTreasureContained(
             positionXDiagonalNeighbour,
             positionYDiagonalNeighbour,
             treasures
           )
         ) {
-          cellValue = `2`
+          cellValue = '2'
           break
         }
       }
-      for (let i = 0; i < side_neighbors.length; i++) {
-        let positionXSideNeighbour = movement.positionX + side_neighbors[i].stepSideX
-        let positionYSideNeighbour = movement.positionY + side_neighbors[i].stepSideY
+      for (let i = 0; i < sideNeighbors.length; i+=1) {
+        const positionXSideNeighbour = movement.positionX + sideNeighbors[i].stepSideX
+        const positionYSideNeighbour = movement.positionY + sideNeighbors[i].stepSideY
         if (
-          check_exists(positionXSideNeighbour, positionYSideNeighbour, treasures)
+          checkTreasureContained(positionXSideNeighbour, positionYSideNeighbour, treasures)
         ) {
-          cellValue = `3`
+          cellValue = '3'
           break
         }
       }
@@ -82,8 +82,8 @@ const check_neighbours = (movements, treasures) => {
   return movementsAsignedValues
 }
 
-module.exports = {
-  check_exists,
-  check_neighbours,
+export const gameLogic = {
+  checkTreasureContained,
+  checkNeighbours,
   generateTreasures,
 }

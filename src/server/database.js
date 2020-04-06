@@ -1,33 +1,33 @@
-const game_logic = require("./game_logic")
+import { gameLogic } from './game_logic'
 
 const COLLS = 5
 const ROWS = 5
 const SCORE_LIMIT = 10
 
-let users = []
+const users = []
 
 function generateTreasureMap() {
-  let treasure_map = []
-  for (let positionX = 0; positionX < ROWS; positionX++) {
-    for (let positionY = 0; positionY < COLLS; positionY++) {
-      treasure_map.push({
-        positionX: positionX,
-        positionY: positionY,
-        value: "",
+  const treasureMap = []
+  for (let positionX = 0; positionX < ROWS; positionX+=1) {
+    for (let positionY = 0; positionY < COLLS; positionY+=1) {
+      treasureMap.push({
+        positionX,
+        positionY,
+        value: '',
       })
     }
   }
-  return treasure_map
+  return treasureMap
 }
 
-const getUserScore = (user_name) => {
-  const user = findUserByName(user_name)
+const getUserScore = (userName) => {
+  const user = findUserByName(userName)
   return user ? user.scores : []
 }
 
-const getBestScores = (user_name) => {
+const getBestScores = (userName) => {
   let topResults
-  const foundUser = findUserByName(user_name)
+  const foundUser = findUserByName(userName)
   if (foundUser) {
     topResults = foundUser.scores.sort((a, b) => a > b).slice(0, SCORE_LIMIT)
   }
@@ -41,7 +41,7 @@ const findUserByName = (name) => users.find((user) => user.name === name)
 const makeMove = (config) => {
   const currentUserIndex = users.findIndex((user) => user.name === config.name)
 
-  const movementsAsignedValues = game_logic.check_neighbours(
+  const movementsAsignedValues = gameLogic.check_neighbours(
     config.movements,
     config.treasures
   )
@@ -65,7 +65,7 @@ const makeMove = (config) => {
   return movementsAsignedValues
 }
 
-module.exports = {
+export const db = {
   getBestScores,
   makeMove,
   findUserByName,

@@ -28,7 +28,7 @@ const fetchScore = (userName) => {
     .catch((error) => console.error(error))
 }
 
-export default {
+export const gameQueries = {
   createUser,
   updateUserScore,
   makeUserMove,

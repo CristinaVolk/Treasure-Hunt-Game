@@ -3,10 +3,10 @@ const COLLS = 5
 const CELL_SIZE = 100
 
 const makeEmptyBoard = () => {
-  let board = []
-  for (let positionX = 0; positionX < ROWS; positionX++) {
+  const board = []
+  for (let positionX = 0; positionX < ROWS; positionX+=1) {
     board[positionX] = []
-    for (let positionY = 0; positionY < COLLS; positionY++) {
+    for (let positionY = 0; positionY < COLLS; positionY+=1) {
       board[positionX][positionY] = false
     }
   }
@@ -29,11 +29,11 @@ const obtainCoordinatesFromClick = (event, elemOffset) => {
 
   const positionX = Math.floor(offsetX / CELL_SIZE)
   const positionY = Math.floor(offsetY / CELL_SIZE)
-  let pointOnMap = { positionX: positionX, positionY: positionY }
+  const pointOnMap = { positionX, positionY }
   return pointOnMap
 }
 
-module.exports = {
+export const core = {
   makeEmptyBoard,
   getElementOffset,
   obtainCoordinatesFromClick,

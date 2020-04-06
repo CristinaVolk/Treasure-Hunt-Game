@@ -1,5 +1,5 @@
-import React from "react"
-import "./App.css"
+import React from 'react'
+import './App.css'
 
 export const CELL_SIZE = 100
 export const WIDTH = 500
@@ -16,7 +16,7 @@ export const Cell = (props) => {
         width: `${CELL_SIZE}px`,
         height: `${CELL_SIZE}px`,
         background: `${color}`,
-        pointerEvents: isEnabled ? `auto` : `none`,
+        pointerEvents: isEnabled ? 'auto' : 'none',
       }}
     >
       <h1>{value}</h1>

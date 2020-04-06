@@ -1,29 +1,29 @@
-var express = require("express")
-var cors = require("cors")
-var { json } = require("body-parser")
-const PORT = 3005
+import express from 'express'
+import cors from 'cors'
+import { json } from 'body-parser'
+import { db } from './database'
 
-var { getBestScores, addUser, makeMove, findUserByName } = require("./database")
+const PORT = 3005
 
 const app = express()
 app.use(json())
 app.use(cors())
 
-app.get("/scores/top/:name", async (req, res) => {
+app.get('/scores/top/:name', async (req, res) => {
   try {
     const { name } = req.params
-    results = await getBestScores(name)
+    const results = await db.getBestScores(name)
     console.log(results)
-    res.setHeader("Content-Type", "application/json")
+    res.setHeader('Content-Type', 'application/json')
     res.json(results)
   } catch (error) {
     console.error(error)
   }
 })
 
-app.post("/user", (req, res) => {
+app.post('/user', (req, res) => {
   try {
-    const user = addUser(req.body.name)
+    const user = db.addUser(req.body.name)
     if (user) res.sendStatus(201)
   } catch (error) {
     console.error(error)
@@ -31,10 +31,10 @@ app.post("/user", (req, res) => {
   }
 })
 
-app.post("/user/move", (req, res) => {
+app.post('/user/move', (req, res) => {
   try {
     const config = req.body
-    const result = makeMove(config)
+    const result = db.makeMove(config)
     res.json(result)
   } catch (error) {
     console.error(error)
@@ -42,10 +42,10 @@ app.post("/user/move", (req, res) => {
   }
 })
 
-app.put("/user/score", async (req, res) => {
+app.put('/user/score', async (req, res) => {
   try {
     const { name, score } = req.body
-    const user = await findUserByName(name)
+    const user = await db.findUserByName(name)
     if (user) user.scores.push(score)
     res.send(user)
   } catch (error) {

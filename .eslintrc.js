@@ -20,7 +20,11 @@ module.exports = {
     browser: true,
   },
   rules: {
+    "no-continue": "off",
+    "array-callback-return":'off',
+    "class-methods-use-this": 'off',
     "react/prop-types": 0,
+    "no-param-reassign": [ 2, { "props": false } ],
     "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
     "no-useless-constructor": "off",
     "import/prefer-default-export": "off",
@@ -35,6 +39,7 @@ module.exports = {
     ],
     "@typescript-eslint/explicit-function-return-type": "off",
     semi: ["warn", "never"],
-    quotes: ["warn", "single", "avoid-escape"],
+    quotes: [ "warn", "single", "avoid-escape" ],
+    "no-console":"off"
   },
 }
