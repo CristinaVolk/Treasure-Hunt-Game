@@ -8,8 +8,8 @@ const users = []
 
 function generateTreasureMap() {
   const treasureMap = []
-  for (let positionX = 0; positionX < ROWS; positionX+=1) {
-    for (let positionY = 0; positionY < COLLS; positionY+=1) {
+  for (let positionX = 0; positionX < ROWS; positionX += 1) {
+    for (let positionY = 0; positionY < COLLS; positionY += 1) {
       treasureMap.push({
         positionX,
         positionY,

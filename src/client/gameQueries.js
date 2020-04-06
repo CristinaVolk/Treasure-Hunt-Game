@@ -9,9 +9,9 @@ const createUser = (userName) => {
 
 const updateUserScore = (name, score) => {
   return put(`${HOST}/user/score`, {
-      name,
-      score,
-    })
+    name,
+    score,
+  })
     .then((result) => result)
     .catch((error) => console.error(error))
 }

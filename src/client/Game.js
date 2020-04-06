@@ -57,8 +57,8 @@ class Game extends React.Component {
   newUser = (newValue) => this.setState({ name: newValue })
 
   makeTreasures = () => {
-    for (let positionY = 0; positionY < this.rows; positionY+=1) {
-      for (let positionX = 0; positionX < this.cols; positionX+=1) {
+    for (let positionY = 0; positionY < this.rows; positionY += 1) {
+      for (let positionX = 0; positionX < this.cols; positionX += 1) {
         if (
           this.treasures.find(
             (treasureItem) =>
@@ -77,8 +77,8 @@ class Game extends React.Component {
     const cells = []
     const color = '#554562'
 
-    for (let positionX = 0; positionX < this.rows; positionX+=1) {
-      for (let positionY = 0; positionY < this.cols; positionY+=1) {
+    for (let positionX = 0; positionX < this.rows; positionX += 1) {
+      for (let positionY = 0; positionY < this.cols; positionY += 1) {
         cells.push({
           positionX,
           positionY,
@@ -120,7 +120,7 @@ class Game extends React.Component {
         cellsValues[objIndex].value = '1'
         cellsValues[objIndex].isEnabled = false
       }
-      i+=1
+      i += 1
     })
 
     return cellsValues
@@ -134,7 +134,7 @@ class Game extends React.Component {
     )
 
     if (this.state.cells[objIndex].isEnabled === false) {
-      this.user.countClicks-=1
+      this.user.countClicks -= 1
       return true
     }
     return false
@@ -147,7 +147,7 @@ class Game extends React.Component {
     )
 
     selectedCellsAssighed.forEach((answer) => {
-      if (answer.value === 'T') this.user.countTreasure+=1
+      if (answer.value === 'T') this.user.countTreasure += 1
     })
 
     if (this.user.countTreasure >= MAX_TREASURES) {
@@ -165,7 +165,7 @@ class Game extends React.Component {
   }
 
   handleClick = (event) => {
-    this.user.countClicks+=1
+    this.user.countClicks += 1
     const elemOffset = core.getElementOffset(this.boardRef)
     const pointOnMap = core.obtainCoordinatesFromClick(event, elemOffset)
 
@@ -195,14 +195,14 @@ class Game extends React.Component {
   runGame = () => {
     this.user = {
       name: this.state.name,
-        board: this.board,
-        movements: [],
-        countTreasure: 0,
-        score: 0,
-        countSets: 0,
-        countClicks: 0,
-        topResults: [],
-      ...this.user
+      board: this.board,
+      movements: [],
+      countTreasure: 0,
+      score: 0,
+      countSets: 0,
+      countClicks: 0,
+      topResults: [],
+      ...this.user,
     }
 
     this.setState({ isGameFinished: false })
@@ -220,21 +220,23 @@ class Game extends React.Component {
     this.treasures = gameLogic.generateTreasures()
     this.user.countTreasure = 0
     this.user.score = 1
-    this.user.countSets+=1
+    this.user.countSets += 1
     this.setState({ isRunning: true })
     this.setState({ cells: this.makeCells(true) })
   }
 
   runMove = async (movements) => {
     this.setState({ isRunning: true })
-    const config = {name: this.user.name,
+    const config = {
+      name: this.user.name,
       movements,
       treasureMap: this.treasureMap,
-      treasures: this.treasures,}
+      treasures: this.treasures,
+    }
 
     const response = await gameQueries.makeUserMove(config)
     console.log(response.status)
-    if (response.status === 200) this.user.score+=1
+    if (response.status === 200) this.user.score += 1
   }
 
   endMove = () => {

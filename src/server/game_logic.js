@@ -8,10 +8,10 @@ const generateTreasures = () => {
   while (i < 3) {
     const positionX = getRandomInt(5)
     const positionY = getRandomInt(5)
-    if ( checkTreasureContained( positionX, positionY, treasures ) ) continue
+    if (checkTreasureContained(positionX, positionY, treasures)) continue
 
     treasures.push({ positionX, positionY })
-    i+=1
+    i += 1
   }
   return treasures
 }
@@ -44,7 +44,7 @@ const checkNeighbours = (movements, treasures) => {
     if (checkTreasureContained(movement.positionX, movement.positionY, treasures)) {
       cellValue = 'T'
     } else {
-      for (let i = 0; i < diagonalNeighbors.length; i+=1) {
+      for (let i = 0; i < diagonalNeighbors.length; i += 1) {
         const positionXDiagonalNeighbour =
           movement.positionX + diagonalNeighbors[i].stepDiagonalX
         const positionYDiagonalNeighbour =
@@ -61,11 +61,17 @@ const checkNeighbours = (movements, treasures) => {
           break
         }
       }
-      for (let i = 0; i < sideNeighbors.length; i+=1) {
-        const positionXSideNeighbour = movement.positionX + sideNeighbors[i].stepSideX
-        const positionYSideNeighbour = movement.positionY + sideNeighbors[i].stepSideY
+      for (let i = 0; i < sideNeighbors.length; i += 1) {
+        const positionXSideNeighbour =
+          movement.positionX + sideNeighbors[i].stepSideX
+        const positionYSideNeighbour =
+          movement.positionY + sideNeighbors[i].stepSideY
         if (
-          checkTreasureContained(positionXSideNeighbour, positionYSideNeighbour, treasures)
+          checkTreasureContained(
+            positionXSideNeighbour,
+            positionYSideNeighbour,
+            treasures
+          )
         ) {
           cellValue = '3'
           break

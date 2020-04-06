@@ -4,9 +4,9 @@ const CELL_SIZE = 100
 
 const makeEmptyBoard = () => {
   const board = []
-  for (let positionX = 0; positionX < ROWS; positionX+=1) {
+  for (let positionX = 0; positionX < ROWS; positionX += 1) {
     board[positionX] = []
-    for (let positionY = 0; positionY < COLLS; positionY+=1) {
+    for (let positionY = 0; positionY < COLLS; positionY += 1) {
       board[positionX][positionY] = false
     }
   }
