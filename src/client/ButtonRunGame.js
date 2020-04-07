@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 
 export class ButtonRunGame extends React.Component {
   handleClick = (event) => {
-    event.preventDefault()
-    this.props.runGame()
-  }
+    event.preventDefault();
+    this.props.runGame();
+  };
 
   render() {
     return (
@@ -15,6 +15,6 @@ export class ButtonRunGame extends React.Component {
       >
         <h6>Run Game</h6>
       </button>
-    )
+    );
   }
 }

@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 
 export class ButtonRunSet extends React.Component {
   handleClick = (event) => {
-    event.preventDefault()
-    this.props.runSet()
-  }
+    event.preventDefault();
+    this.props.runSet();
+  };
 
   render() {
     return (
@@ -17,6 +17,6 @@ export class ButtonRunSet extends React.Component {
           <p>Press the button to run the Set</p>
         </h6>
       </button>
-    )
+    );
   }
 }

@@ -1,21 +1,21 @@
-import React from 'react'
+import React from 'react';
 
 export class Login extends React.Component {
   constructor(props) {
-    super(props)
-    this.addNewUser = this.addNewUser.bind(this)
-    this.onSubmit = this.onSubmit.bind(this)
+    super(props);
+    this.addNewUser = this.addNewUser.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   addNewUser = (event) => {
-    event.preventDefault()
-    this.props.onUser(event.target.value)
-  }
+    event.preventDefault();
+    this.props.onUser(event.target.value);
+  };
 
   onSubmit = (event) => {
-    event.preventDefault()
-    this.props.onHandleSubmit()
-  }
+    event.preventDefault();
+    this.props.onHandleSubmit();
+  };
 
   render() {
     return (
@@ -31,6 +31,6 @@ export class Login extends React.Component {
         </label>
         <input style={{ fontSize: '24px' }} type="submit" value="Submit" />
       </form>
-    )
+    );
   }
 }

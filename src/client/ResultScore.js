@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 export const ResultScore = (props) => {
-  const { topResults } = props
+  const { topResults } = props;
   return (
     <React.Fragment>
       <h1>The Game is Over</h1>
@@ -10,5 +10,5 @@ export const ResultScore = (props) => {
         <p key={index}>{result}</p>
       ))}
     </React.Fragment>
-  )
-}
+  );
+};

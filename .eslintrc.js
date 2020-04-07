@@ -1,11 +1,19 @@
 module.exports = {
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+    browser: true,
+  },
   settings: {
     react: {
       version: 'detect',
     },
   },
+  plugins: ['import'],
   parser: '@typescript-eslint/parser',
   extends: [
+    'eslint:recommended',
     'airbnb-base',
     'plugin:prettier/recommended',
     'plugin:import/typescript',
@@ -14,33 +22,22 @@ module.exports = {
     'prettier/@typescript-eslint',
     'plugin:react/recommended',
   ],
-  root: true,
-  env: {
-    node: true,
-    jest: true,
-    browser: true,
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: 'module',
   },
   rules: {
+    "import/first": "error",
     'no-continue': 'off',
     'array-callback-return': 'off',
     'class-methods-use-this': 'off',
     'react/prop-types': 0,
     'no-param-reassign': [2, { props: false }],
-    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-useless-constructor': 'off',
-    'import/prefer-default-export': 'off',
-    '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-useless-constructor': 'error',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-      },
-    ],
     '@typescript-eslint/explicit-function-return-type': 'off',
-    semi: ['warn', 'never'],
+    semi: 'off',
     quotes: ['warn', 'single', 'avoid-escape'],
-    'no-console': ['warn', { allow: ['warn'] }],
+    'no-console': [ 'warn', { allow: [ 'warn' ] } ],
+    "@typescript-eslint/no-use-before-define": "warn"
   },
-}
+};

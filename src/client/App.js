@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
-import './App.css'
-import Game from './Game'
+import React, { Component } from 'react';
+import './App.css';
+import Game from './Game';
 
 class App extends Component {
   render() {
@@ -9,8 +9,8 @@ class App extends Component {
         <h1>Treasure hunter Game</h1>
         <Game />
       </div>
-    )
+    );
   }
 }
 
-export default App
+export default App;
