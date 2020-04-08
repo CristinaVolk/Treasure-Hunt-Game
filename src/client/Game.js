@@ -44,6 +44,7 @@ class Game extends React.Component {
     isUser: false,
     error: '',
     messageForUser: '',
+    topResults: [],
   };
 
   handleSubmit = async () => {
@@ -51,7 +52,6 @@ class Game extends React.Component {
       this.setState({ error: 'You should provide your name' });
     else {
       const newUser = await gameQueries.createUser(this.state.name);
-      console.log(newUser);
 
       if (newUser) {
         this.setState({ isUser: true });
@@ -92,8 +92,8 @@ class Game extends React.Component {
       this.user.movements.push(pointOnMap);
     }
     if (this.user.countClicks === MAX_CLICKS) {
-      console.log('movements', this.user.movements);
       this.runMove();
+
       this.endMove();
     }
   };
@@ -115,13 +115,12 @@ class Game extends React.Component {
   };
 
   runSet = () => {
+    this.setState({ cells: enableTreasureMapBoard(this.user.treasureMap) });
     if (this.user.countSets === 3) {
       this.displayResult();
       this.stopGame();
     }
-    this.setState({ cells: enableTreasureMapBoard(this.user.treasureMap) });
     this.user.countSets += 1;
-    console.log(this.user.countSets);
     this.setState({ isRunning: true });
   };
 
@@ -133,16 +132,18 @@ class Game extends React.Component {
     };
 
     const response = await gameQueries.makeUserMove(config);
-    console.log(response);
     if (response) {
-      if (response.data.countTreasures === 0) {
+      if (response.data.countMoves === 0) {
+        this.setState({ isRunning: false });
+        this.setState({
+          messageForUser: 'You have not found all of the treasures...Try again',
+        });
+      }
+      if (response.data.countTreasures === 3) {
         this.setState({ isRunning: false });
         this.setState({
           messageForUser: 'Congrats! You have found all of the treasures!',
         });
-      }
-      if (response.data.countMoves === 0) {
-        this.setState({ isRunning: false });
       }
 
       this.user.treasureMap = response.data.treasureMap;
@@ -162,18 +163,9 @@ class Game extends React.Component {
     this.setState({ isGameStart: false });
   };
 
-  updateScores = async () => {
-    const responseStatus = await gameQueries.updateUserScore(
-      this.user.name,
-      this.user.score
-    );
-    console.log(responseStatus);
-  };
-
   displayResult = async () => {
     const userScore = await gameQueries.fetchScore(this.user.name);
-    console.log(userScore);
-    if (userScore.length) this.user.topResults = userScore;
+    if (userScore.length) this.setState({ topResults: userScore });
   };
 
   render() {
@@ -186,6 +178,7 @@ class Game extends React.Component {
       isUser,
       error,
       messageForUser,
+      topResults,
     } = this.state;
 
     return (
@@ -229,7 +222,7 @@ class Game extends React.Component {
             </div>
 
             <div className="controls">
-              {isGameFinished && <ResultScore topResults={this.user.topResults} />}
+              {isGameFinished && <ResultScore topResults={topResults} />}
 
               {!isGameStart && !isRunning && (
                 <ButtonRunGame runGame={this.runGame} />

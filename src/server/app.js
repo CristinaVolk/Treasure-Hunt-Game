@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-/* import cors from 'cors'
-import { json } from 'body-parser'
-import { db } from './database' */
-
 const express = require('express');
 const cors = require('cors');
 const { json } = require('body-parser');
@@ -19,7 +15,6 @@ app.get('/scores/top/:name', async (req, res) => {
   try {
     const { name } = req.params;
     const results = await db.getBestScores(name);
-    console.log(results);
     res.setHeader('Content-Type', 'application/json');
     res.json(results);
   } catch (error) {
@@ -45,18 +40,6 @@ app.post('/user/move', (req, res) => {
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
-  }
-});
-
-app.put('/user/score', async (req, res) => {
-  try {
-    const { name, score } = req.body;
-    const user = await db.findUserByName(name);
-    if (user) user.scores.push(score);
-    res.send(user);
-  } catch (error) {
-    console.error(error);
-    res.send(error);
   }
 });
 

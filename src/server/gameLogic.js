@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const checkTreasureContained = (positionX, positionY, mapArray) => {
@@ -94,18 +95,33 @@ const enableTreasureMap = (treasureMap) => {
   return treasureMap;
 };
 
-const countTreasures = (treasureMap) => {
-  let countTreasure = 1;
+const countNumberOfTreasures = (treasureMap) => {
+  let countTreasure = 0;
   treasureMap.forEach((field) => {
     if (field.value === 'T') countTreasure += 1;
   });
   return countTreasure;
 };
 
+const obtainDataToSend = (currentUser, countMoves) => {
+  let countTreasures = countNumberOfTreasures(currentUser.treasureMap);
+  if (countTreasures >= 3) {
+    currentUser.scores.push(countMoves);
+    currentUser.treasureMap = makeTreasureMapEmpty(currentUser.treasureMap);
+    countTreasures = 3;
+    countMoves = 0;
+  }
+  if (countMoves === 8) {
+    currentUser.treasureMap = makeTreasureMapEmpty(currentUser.treasureMap);
+    countMoves = 0;
+  }
+  return { treasureMap: currentUser.treasureMap, countMoves, countTreasures };
+};
+
 module.exports = {
   checkTreasureContained,
   checkNeighbours,
-  countTreasures,
   makeTreasureMapEmpty,
   enableTreasureMap,
+  obtainDataToSend,
 };

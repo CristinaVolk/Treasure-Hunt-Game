@@ -7,10 +7,7 @@ const users = [];
 const SCORE_LIMIT = 10;
 let countMoves = 0;
 
-const getUserScore = (userName) => {
-  const user = findUserByName(userName);
-  return user ? user.scores : [];
-};
+const findUserByName = (name) => users.find((user) => user.name === name);
 
 const getBestScores = (userName) => {
   let topResults;
@@ -32,15 +29,12 @@ const addUser = (name) => {
   return users[lengthOfUsers - 1];
 };
 
-const findUserByName = (name) => users.find((user) => user.name === name);
-
 const makeMove = (config) => {
+  if (countMoves === 8) countMoves = 0;
   const currentUserIndex = users.findIndex((user) => user.name === config.name);
   const currentUser = users[currentUserIndex];
   gameLogic.enableTreasureMap(currentUser.treasureMap);
-  console.log('tres', currentUser.treasures);
   countMoves += 1;
-  console.log(countMoves);
   const movementsAsignedValues = gameLogic.checkNeighbours(
     config.movements,
     currentUser.treasures
@@ -63,21 +57,19 @@ const makeMove = (config) => {
     });
   }
 
-  let countTreasures = gameLogic.countTreasures(currentUser.treasureMap);
-  if (countTreasures === 4 || countMoves === 8) {
-    currentUser.treasureMap = gameLogic.makeTreasureMapEmpty(
-      currentUser.treasureMap
-    );
-    if (countTreasures > 3) countTreasures = 0;
-    if (countMoves === 8) countMoves = 0;
-  }
-  return { treasureMap: currentUser.treasureMap, countMoves, countTreasures };
+  const dataToClient = gameLogic.obtainDataToSend(currentUser, countMoves);
+  countMoves = dataToClient.countMoves;
+
+  return {
+    treasureMap: dataToClient.treasureMap,
+    countMoves: dataToClient.countMoves,
+    countTreasures: dataToClient.countTreasures,
+  };
 };
 
 module.exports = {
   getBestScores,
   makeMove,
   findUserByName,
-  getUserScore,
   addUser,
 };

@@ -27,6 +27,7 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
+    "import/prefer-default-export":"off",
     "import/first": "error",
     'no-continue': 'off',
     'array-callback-return': 'off',
