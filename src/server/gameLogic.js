@@ -82,12 +82,20 @@ const makeTreasureMapEmpty = (treasureMap) => {
   treasureMap.map((field) => {
     field.value = '';
     field.color = '#554562';
+    field.isEnabled = false;
+  });
+  return treasureMap;
+};
+
+const enableTreasureMap = (treasureMap) => {
+  treasureMap.map((field) => {
+    field.isEnabled = true;
   });
   return treasureMap;
 };
 
 const countTreasures = (treasureMap) => {
-  let countTreasure = 0;
+  let countTreasure = 1;
   treasureMap.forEach((field) => {
     if (field.value === 'T') countTreasure += 1;
   });
@@ -99,4 +107,5 @@ module.exports = {
   checkNeighbours,
   countTreasures,
   makeTreasureMapEmpty,
+  enableTreasureMap,
 };

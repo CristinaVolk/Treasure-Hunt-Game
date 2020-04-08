@@ -1,8 +1,8 @@
-const ROWS = 5;
-const COLLS = 5;
-const CELL_SIZE = 100;
+export const ROWS = 5;
+export const COLLS = 5;
+export const CELL_SIZE = 100;
 
-const makeEmptyBoard = () => {
+export const makeEmptyBoard = () => {
   const board = [];
   for (let positionX = 0; positionX < ROWS; positionX += 1) {
     board[positionX] = [];
@@ -13,7 +13,14 @@ const makeEmptyBoard = () => {
   return board;
 };
 
-const getElementOffset = (boardRef) => {
+export const enableTreasureMapBoard = (treasureBoard) => {
+  treasureBoard.map((field) => {
+    field.isEnabled = true;
+  });
+  return [...treasureBoard];
+};
+
+export const getElementOffset = (boardRef) => {
   const rect = boardRef.getBoundingClientRect();
   const doc = document.documentElement;
 
@@ -23,7 +30,7 @@ const getElementOffset = (boardRef) => {
   };
 };
 
-const obtainCoordinatesFromClick = (event, elemOffset) => {
+export const obtainCoordinatesFromClick = (event, elemOffset) => {
   const offsetX = event.clientX - elemOffset.positionX;
   const offsetY = event.clientY - elemOffset.positionY;
 
@@ -31,10 +38,4 @@ const obtainCoordinatesFromClick = (event, elemOffset) => {
   const positionY = Math.floor(offsetY / CELL_SIZE);
   const pointOnMap = { positionX, positionY };
   return pointOnMap;
-};
-
-export const core = {
-  makeEmptyBoard,
-  getElementOffset,
-  obtainCoordinatesFromClick,
 };

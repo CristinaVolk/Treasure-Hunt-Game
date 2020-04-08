@@ -5,7 +5,6 @@ const init = require('./init');
 
 const users = [];
 const SCORE_LIMIT = 10;
-const MAX_TREASURES = 3;
 let countMoves = 0;
 
 const getUserScore = (userName) => {
@@ -38,6 +37,7 @@ const findUserByName = (name) => users.find((user) => user.name === name);
 const makeMove = (config) => {
   const currentUserIndex = users.findIndex((user) => user.name === config.name);
   const currentUser = users[currentUserIndex];
+  gameLogic.enableTreasureMap(currentUser.treasureMap);
   console.log('tres', currentUser.treasures);
   countMoves += 1;
   console.log(countMoves);
@@ -63,11 +63,13 @@ const makeMove = (config) => {
     });
   }
 
-  const countTreasures = gameLogic.countTreasures(currentUser.treasureMap);
-  if (countTreasures === 3 || countMoves === 8) {
+  let countTreasures = gameLogic.countTreasures(currentUser.treasureMap);
+  if (countTreasures === 4 || countMoves === 8) {
     currentUser.treasureMap = gameLogic.makeTreasureMapEmpty(
       currentUser.treasureMap
     );
+    if (countTreasures > 3) countTreasures = 0;
+    if (countMoves === 8) countMoves = 0;
   }
   return { treasureMap: currentUser.treasureMap, countMoves, countTreasures };
 };

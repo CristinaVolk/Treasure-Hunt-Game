@@ -7,13 +7,14 @@ import { ResultScore } from './ResultScore';
 import { ButtonRunGame } from './ButtonRunGame';
 import { ButtonRunSet } from './ButtonRunSet';
 
-import { core } from './core';
+import {
+  makeEmptyBoard,
+  getElementOffset,
+  obtainCoordinatesFromClick,
+  enableTreasureMapBoard,
+} from './core';
 import { gameQueries } from './gameQueries';
 
-const gameLogic = require('../server/gameLogic');
-
-const MAX_MOVES = 8;
-const MAX_TREASURES = 3;
 const MAX_CLICKS = 3;
 
 class Game extends React.Component {
@@ -21,8 +22,8 @@ class Game extends React.Component {
     super();
     this.rows = HEIGHT / CELL_SIZE;
     this.cols = WIDTH / CELL_SIZE;
-    this.board = core.makeEmptyBoard();
-    this.user = null;
+    this.board = makeEmptyBoard();
+    this.user = {};
 
     this.newUser = this.newUser.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -41,10 +42,13 @@ class Game extends React.Component {
     isGameStart: false,
     isGameFinished: false,
     isUser: false,
+    error: '',
+    messageForUser: '',
   };
 
   handleSubmit = async () => {
-    if (this.state.name.length === 0) alert('You should provide your name');
+    if (this.state.name.length === 0)
+      this.setState({ error: 'You should provide your name' });
     else {
       const newUser = await gameQueries.createUser(this.state.name);
       console.log(newUser);
@@ -74,8 +78,8 @@ class Game extends React.Component {
 
   handleClick = (event) => {
     this.user.countClicks += 1;
-    const elemOffset = core.getElementOffset(this.boardRef);
-    const pointOnMap = core.obtainCoordinatesFromClick(event, elemOffset);
+    const elemOffset = getElementOffset(this.boardRef);
+    const pointOnMap = obtainCoordinatesFromClick(event, elemOffset);
 
     if (this.checkIfCellWasClicked(pointOnMap)) return;
 
@@ -97,11 +101,10 @@ class Game extends React.Component {
   runGame = () => {
     this.user = {
       name: this.state.name,
-      board: this.board,
+      treasureMap: this.state.cells,
       movements: [],
       countSets: 0,
       countClicks: 0,
-      countMoves: 0,
       topResults: [],
       ...this.user,
     };
@@ -112,19 +115,17 @@ class Game extends React.Component {
   };
 
   runSet = () => {
-    if (this.user.countSets >= 3) {
+    if (this.user.countSets === 3) {
       this.displayResult();
-      this.setState({ isGameFinished: true });
       this.stopGame();
     }
-    this.user.countTreasure = 0;
+    this.setState({ cells: enableTreasureMapBoard(this.user.treasureMap) });
     this.user.countSets += 1;
+    console.log(this.user.countSets);
     this.setState({ isRunning: true });
-    // this.setState({ cells: this.makeCells(true) });
   };
 
   runMove = async () => {
-    this.user.countMoves += 1;
     this.setState({ isRunning: true });
     const config = {
       name: this.user.name,
@@ -134,10 +135,18 @@ class Game extends React.Component {
     const response = await gameQueries.makeUserMove(config);
     console.log(response);
     if (response) {
-      this.setState({ cells: response.data.treasureMap });
-      if (response.data.countTreasures === 3 || response.data.countMoves === 8) {
+      if (response.data.countTreasures === 0) {
+        this.setState({ isRunning: false });
+        this.setState({
+          messageForUser: 'Congrats! You have found all of the treasures!',
+        });
+      }
+      if (response.data.countMoves === 0) {
         this.setState({ isRunning: false });
       }
+
+      this.user.treasureMap = response.data.treasureMap;
+      this.setState({ cells: response.data.treasureMap });
     }
   };
 
@@ -147,7 +156,8 @@ class Game extends React.Component {
   };
 
   stopGame = () => {
-    core.makeEmptyBoard();
+    makeEmptyBoard();
+    this.setState({ isGameFinished: true });
     this.setState({ isRunning: false });
     this.setState({ isGameStart: false });
   };
@@ -174,16 +184,21 @@ class Game extends React.Component {
       isGameStart,
       isGameFinished,
       isUser,
+      error,
+      messageForUser,
     } = this.state;
 
     return (
       <div>
         {!isUser ? (
-          <Login
-            onUser={this.newUser}
-            onHandleSubmit={this.handleSubmit}
-            name={name}
-          />
+          <React.Fragment>
+            <Login
+              onUser={this.newUser}
+              onHandleSubmit={this.handleSubmit}
+              name={name}
+            />
+            <span>{error}</span>
+          </React.Fragment>
         ) : (
           <div>
             <div
@@ -220,7 +235,14 @@ class Game extends React.Component {
                 <ButtonRunGame runGame={this.runGame} />
               )}
 
-              {!isRunning && isGameStart && <ButtonRunSet runSet={this.runSet} />}
+              {!isRunning && isGameStart ? (
+                <React.Fragment>
+                  <ButtonRunSet runSet={this.runSet} />
+                  <h3>{messageForUser}</h3>
+                </React.Fragment>
+              ) : (
+                ''
+              )}
             </div>
           </div>
         )}
