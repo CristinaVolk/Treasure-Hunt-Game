@@ -14,10 +14,9 @@ export const makeEmptyBoard = () => {
 };
 
 export const enableTreasureMapBoard = (treasureBoard) => {
-  treasureBoard.map((field) => {
-    field.isEnabled = true;
+  return treasureBoard.map((field) => {
+    return { ...field, isEnabled: true };
   });
-  return [...treasureBoard];
 };
 
 export const getElementOffset = (boardRef) => {

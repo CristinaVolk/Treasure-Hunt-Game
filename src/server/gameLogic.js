@@ -1,127 +1,109 @@
-/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-var-requires */
+const colorValOne = '#99848c';
+const colorValTwo = '#e4f1e7';
+const colorValThree = '#ddc1cc';
+const colorValTreasure = '#ee6c75';
 
-const checkTreasureContained = (positionX, positionY, mapArray) => {
+const diagonalNeighbors = [
+  { stepDiagonalX: -1, stepDiagonalY: -1 },
+  { stepDiagonalX: -1, stepDiagonalY: 1 },
+  { stepDiagonalX: 1, stepDiagonalY: -1 },
+  { stepDiagonalX: 1, stepDiagonalY: 1 },
+];
+
+const sideNeighbors = [
+  { stepSideX: 0, stepSideY: -1 },
+  { stepSideX: 0, stepSideY: 1 },
+  { stepSideX: 1, stepSideY: 0 },
+  { stepSideX: -1, stepSideY: 0 },
+];
+
+const checkContained = (positionX, positionY, mapArray) => {
   return mapArray.find(
     (item) => item.positionX === positionX && item.positionY === positionY
   );
 };
 
-const checkNeighbours = (movements, treasures) => {
+const checkNeighbours = (treasureMap, treasures) => {
   let cellValue = '1';
-  let cellColor = '#99848c';
-  const movementsAsignedValues = [];
+  let cellColor = colorValOne;
 
-  const diagonalNeighbors = [
-    { stepDiagonalX: -1, stepDiagonalY: -1 },
-    { stepDiagonalX: -1, stepDiagonalY: 1 },
-    { stepDiagonalX: 1, stepDiagonalY: 1 },
-    { stepDiagonalX: 1, stepDiagonalY: -1 },
-  ];
-
-  const sideNeighbors = [
-    { stepSideX: 0, stepSideY: -1 },
-    { stepSideX: 1, stepSideY: 0 },
-    { stepSideX: 0, stepSideY: 1 },
-    { stepSideX: -1, stepSideY: 0 },
-  ];
-
-  movements.forEach((movement) => {
-    if (checkTreasureContained(movement.positionX, movement.positionY, treasures)) {
-      checkTreasureContained(movement.positionX, movement.positionY, treasures);
+  const generatedMap = treasureMap.map((field) => {
+    if (checkContained(field.positionX, field.positionY, treasures) !== undefined) {
       cellValue = 'T';
-      cellColor = '#ee6c75';
-    } else {
+      cellColor = colorValTreasure;
+    } else if (
+      checkContained(field.positionX, field.positionY, treasures) === undefined
+    ) {
+      cellValue = '1';
+      cellColor = colorValOne;
+
       for (let i = 0; i < diagonalNeighbors.length; i += 1) {
         const positionXDiagonalNeighbour =
-          movement.positionX + diagonalNeighbors[i].stepDiagonalX;
+          field.positionX + diagonalNeighbors[i].stepDiagonalX;
         const positionYDiagonalNeighbour =
-          movement.positionY + diagonalNeighbors[i].stepDiagonalY;
+          field.positionY + diagonalNeighbors[i].stepDiagonalY;
 
         if (
-          checkTreasureContained(
+          checkContained(
             positionXDiagonalNeighbour,
             positionYDiagonalNeighbour,
             treasures
-          )
+          ) !== undefined
         ) {
           cellValue = '2';
-          cellColor = '#e4f1e7';
+          cellColor = colorValTwo;
           break;
         }
       }
       for (let i = 0; i < sideNeighbors.length; i += 1) {
-        const positionXSideNeighbour =
-          movement.positionX + sideNeighbors[i].stepSideX;
-        const positionYSideNeighbour =
-          movement.positionY + sideNeighbors[i].stepSideY;
+        const positionXSideNeighbour = field.positionX + sideNeighbors[i].stepSideX;
+        const positionYSideNeighbour = field.positionY + sideNeighbors[i].stepSideY;
         if (
-          checkTreasureContained(
+          checkContained(
             positionXSideNeighbour,
             positionYSideNeighbour,
             treasures
-          )
+          ) !== undefined
         ) {
           cellValue = '3';
-          cellColor = '#ddc1cc';
+          cellColor = colorValThree;
           break;
         }
       }
     }
 
-    movementsAsignedValues.push({
-      positionX: movement.positionX,
-      positionY: movement.positionY,
+    return {
+      ...field,
       value: cellValue,
       color: cellColor,
-    });
+    };
   });
-  return movementsAsignedValues;
+  return generatedMap;
 };
 
 const makeTreasureMapEmpty = (treasureMap) => {
-  treasureMap.map((field) => {
-    field.value = '';
-    field.color = '#554562';
-    field.isEnabled = false;
+  return treasureMap.map((field) => {
+    return { ...field, color: '', isEnabled: false, value: '' };
   });
-  return treasureMap;
 };
 
 const enableTreasureMap = (treasureMap) => {
-  treasureMap.map((field) => {
-    field.isEnabled = true;
+  return treasureMap.map((field) => {
+    return { ...field, isEnabled: false };
   });
-  return treasureMap;
 };
 
 const countNumberOfTreasures = (treasureMap) => {
-  let countTreasure = 0;
-  treasureMap.forEach((field) => {
-    if (field.value === 'T') countTreasure += 1;
-  });
-  return countTreasure;
-};
-
-const obtainDataToSend = (currentUser, countMoves) => {
-  let countTreasures = countNumberOfTreasures(currentUser.treasureMap);
-  if (countTreasures >= 3) {
-    currentUser.scores.push(countMoves);
-    currentUser.treasureMap = makeTreasureMapEmpty(currentUser.treasureMap);
-    countTreasures = 3;
-    countMoves = 0;
-  }
-  if (countMoves === 8) {
-    currentUser.treasureMap = makeTreasureMapEmpty(currentUser.treasureMap);
-    countMoves = 0;
-  }
-  return { treasureMap: currentUser.treasureMap, countMoves, countTreasures };
+  return treasureMap.filter(
+    (field) => field.value === 'T' && field.isRevealed === true
+  ).length;
 };
 
 module.exports = {
-  checkTreasureContained,
+  checkContained,
   checkNeighbours,
   makeTreasureMapEmpty,
   enableTreasureMap,
-  obtainDataToSend,
+  countNumberOfTreasures,
 };

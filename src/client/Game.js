@@ -133,7 +133,7 @@ class Game extends React.Component {
 
     const response = await gameQueries.makeUserMove(config);
     if (response) {
-      if (response.data.countMoves === 0) {
+      if (response.data.countMoves === 8) {
         this.setState({ isRunning: false });
         this.setState({
           messageForUser: 'You have not found all of the treasures...Try again',
@@ -145,7 +145,7 @@ class Game extends React.Component {
           messageForUser: 'Congrats! You have found all of the treasures!',
         });
       }
-
+      console.log(response.data);
       this.user.treasureMap = response.data.treasureMap;
       this.setState({ cells: response.data.treasureMap });
     }
@@ -215,6 +215,7 @@ class Game extends React.Component {
                     color={cell.color}
                     value={cell.value}
                     isEnabled={isRunning}
+                    isRevealed={cell.isRevealed}
                     key={`${cell.positionX},${cell.positionY}`}
                   />
                 );

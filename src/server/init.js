@@ -3,7 +3,6 @@ const gameLogic = require('./gameLogic');
 
 const COLLS = 5;
 const ROWS = 5;
-const COLOR = '#554562';
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * Math.floor(max));
@@ -15,7 +14,7 @@ const generateTreasures = () => {
   while (i < 3) {
     const positionX = getRandomInt(5);
     const positionY = getRandomInt(5);
-    if (gameLogic.checkTreasureContained(positionX, positionY, treasures)) continue;
+    if (gameLogic.checkContained(positionX, positionY, treasures)) continue;
 
     treasures.push({ positionX, positionY });
     i += 1;
@@ -31,8 +30,9 @@ const generateTreasureMap = () => {
         positionX,
         positionY,
         value: '',
-        color: COLOR,
+        color: '',
         isEnabled: true,
+        isRevealed: false,
       });
     }
   }
