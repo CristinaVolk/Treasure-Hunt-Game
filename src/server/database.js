@@ -41,7 +41,23 @@ const makeMove = (config) => {
   countMoves += 1;
   const currentUserIndex = users.findIndex((user) => user.name === config.name);
   const currentUser = users[currentUserIndex];
+
+  currentUser.movements = [...currentUser.movements, ...config.movements];
+  gameLogic.enableTreasureMap(currentUser.treasureMap);
+
+  const newMap = currentUser.treasureMap.map((field) =>
+    gameLogic.checkContained(field.positionX, field.positionY, config.movements) !==
+    undefined
+      ? { ...field, isRevealed: true }
+      : { ...field }
+  );
+
+  currentUser.treasureMap = [...newMap];
+
+  countTreasures = gameLogic.countNumberOfTreasures(currentUser.treasureMap);
+
   if (countMoves === 8 || countTreasures === 3) {
+    if (countTreasures === 3) currentUser.scores.push(countMoves);
     const countMovesToSend = countMoves;
 
     currentUser.treasures = init.generateTreasures();
@@ -57,19 +73,6 @@ const makeMove = (config) => {
       countTreasures,
     };
   }
-  currentUser.movements = [...currentUser.movements, ...config.movements];
-  gameLogic.enableTreasureMap(currentUser.treasureMap);
-
-  const newMap = currentUser.treasureMap.map((field) =>
-    gameLogic.checkContained(field.positionX, field.positionY, config.movements) !==
-    undefined
-      ? { ...field, isRevealed: true }
-      : { ...field }
-  );
-
-  currentUser.treasureMap = [...newMap];
-
-  countTreasures = gameLogic.countNumberOfTreasures(currentUser.treasureMap);
 
   return {
     treasureMap: currentUser.treasureMap,
