@@ -14,7 +14,7 @@ const generateTreasures = () => {
   while (i < 3) {
     const positionX = getRandomInt(5);
     const positionY = getRandomInt(5);
-    if (gameLogic.checkContained(positionX, positionY, treasures)) continue;
+    if (gameLogic.checkContained(positionX, positionY, treasures) !== -1) continue;
 
     treasures.push({ positionX, positionY });
     i += 1;

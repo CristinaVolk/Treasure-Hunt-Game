@@ -4,6 +4,11 @@ const colorValTwo = '#e4f1e7';
 const colorValThree = '#ddc1cc';
 const colorValTreasure = '#ee6c75';
 
+const TREASURE = 'T';
+const firstProximity = '1';
+const secondProximity = '2';
+const thirdProximity = '3';
+
 const diagonalNeighbors = [
   { stepDiagonalX: -1, stepDiagonalY: -1 },
   { stepDiagonalX: -1, stepDiagonalY: 1 },
@@ -19,23 +24,21 @@ const sideNeighbors = [
 ];
 
 const checkContained = (positionX, positionY, mapArray) => {
-  return mapArray.find(
+  return mapArray.findIndex(
     (item) => item.positionX === positionX && item.positionY === positionY
   );
 };
 
 const checkNeighbours = (treasureMap, treasures) => {
-  let cellValue = '1';
+  let cellValue = firstProximity;
   let cellColor = colorValOne;
 
   const generatedMap = treasureMap.map((field) => {
-    if (checkContained(field.positionX, field.positionY, treasures) !== undefined) {
-      cellValue = 'T';
+    if (checkContained(field.positionX, field.positionY, treasures) !== -1) {
+      cellValue = TREASURE;
       cellColor = colorValTreasure;
-    } else if (
-      checkContained(field.positionX, field.positionY, treasures) === undefined
-    ) {
-      cellValue = '1';
+    } else if (checkContained(field.positionX, field.positionY, treasures) === -1) {
+      cellValue = firstProximity;
       cellColor = colorValOne;
 
       for (let i = 0; i < diagonalNeighbors.length; i += 1) {
@@ -49,9 +52,9 @@ const checkNeighbours = (treasureMap, treasures) => {
             positionXDiagonalNeighbour,
             positionYDiagonalNeighbour,
             treasures
-          ) !== undefined
+          ) !== -1
         ) {
-          cellValue = '2';
+          cellValue = secondProximity;
           cellColor = colorValTwo;
           break;
         }
@@ -64,9 +67,9 @@ const checkNeighbours = (treasureMap, treasures) => {
             positionXSideNeighbour,
             positionYSideNeighbour,
             treasures
-          ) !== undefined
+          ) !== -1
         ) {
-          cellValue = '3';
+          cellValue = thirdProximity;
           cellColor = colorValThree;
           break;
         }
@@ -96,7 +99,7 @@ const enableTreasureMap = (treasureMap) => {
 
 const countNumberOfTreasures = (treasureMap) => {
   return treasureMap.filter(
-    (field) => field.value === 'T' && field.isRevealed === true
+    (field) => field.value === TREASURE && field.isRevealed === true
   ).length;
 };
 

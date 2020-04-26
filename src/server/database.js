@@ -5,7 +5,8 @@ const init = require('./init');
 
 const users = [];
 const SCORE_LIMIT = 10;
-let countMoves = 0;
+const MAX_TREASURES = 3;
+const MAX_MOVES = 8;
 let countTreasures = 0;
 
 const findUserByName = (name) => users.find((user) => user.name === name);
@@ -33,21 +34,22 @@ const addUser = (name) => {
     movements: [],
     treasureMap: treasureMapWithValues,
     treasures,
+    countMoves: 0,
   });
   return users[lengthOfUsers - 1];
 };
 
 const makeMove = (config) => {
-  countMoves += 1;
   const currentUserIndex = users.findIndex((user) => user.name === config.name);
   const currentUser = users[currentUserIndex];
+  currentUser.countMoves += 1;
 
   currentUser.movements = [...currentUser.movements, ...config.movements];
   gameLogic.enableTreasureMap(currentUser.treasureMap);
 
   const newMap = currentUser.treasureMap.map((field) =>
     gameLogic.checkContained(field.positionX, field.positionY, config.movements) !==
-    undefined
+    -1
       ? { ...field, isRevealed: true }
       : { ...field }
   );
@@ -56,9 +58,10 @@ const makeMove = (config) => {
 
   countTreasures = gameLogic.countNumberOfTreasures(currentUser.treasureMap);
 
-  if (countMoves === 8 || countTreasures === 3) {
-    if (countTreasures === 3) currentUser.scores.push(countMoves);
-    const countMovesToSend = countMoves;
+  if (currentUser.countMoves === MAX_MOVES || countTreasures === MAX_TREASURES) {
+    if (countTreasures === MAX_TREASURES)
+      currentUser.scores.push(currentUser.countMoves);
+    const countMovesToSend = currentUser.countMoves;
 
     currentUser.treasures = init.generateTreasures();
     const newTreasureMap = init.generateTreasureMap();
@@ -66,7 +69,7 @@ const makeMove = (config) => {
       newTreasureMap,
       currentUser.treasures
     );
-    countMoves = 0;
+    currentUser.countMoves = 0;
     return {
       treasureMap: currentUser.treasureMap,
       countMoves: countMovesToSend,
@@ -76,7 +79,7 @@ const makeMove = (config) => {
 
   return {
     treasureMap: currentUser.treasureMap,
-    countMoves,
+    countMoves: currentUser.countMoves,
     countTreasures,
   };
 };
